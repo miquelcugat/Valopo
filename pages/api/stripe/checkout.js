@@ -1,6 +1,5 @@
 import { stripe } from '../../../lib/stripe';
 import { supabaseAdmin } from '../../../lib/supabaseAdmin';
-import { createServerClient } from '@supabase/auth-helpers-nextjs';
 
 export default async function handler(req, res) {
   if (req.method !== 'POST') {
