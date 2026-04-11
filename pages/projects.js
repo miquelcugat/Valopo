@@ -14,6 +14,7 @@ import {
   ResponsiveContainer,
 } from 'recharts';
 import { supabase } from '../lib/supabaseClient';
+import { usePlan } from '../lib/usePlan';
 
 export default function Projects() {
   const router = useRouter();
@@ -24,6 +25,10 @@ export default function Projects() {
   const [selectedId, setSelectedId] = useState('');
   const [exporting, setExporting] = useState(false);
   const [toast, setToast] = useState(null);
+  const [showUpgradeModal, setShowUpgradeModal] = useState(false);
+
+  // Plan
+  const { isPro, loading: planLoading } = usePlan(user?.id);
 
   const dailyChartRef = useRef(null);
   const weeklyChartRef = useRef(null);
@@ -275,6 +280,10 @@ export default function Projects() {
 
   const exportPDF = async () => {
     if (!selectedProject) return;
+    if (!isPro) {
+      setShowUpgradeModal(true);
+      return;
+    }
     setExporting(true);
     try {
       const [{ default: jsPDF }, { default: html2canvas }] = await Promise.all([
@@ -521,9 +530,14 @@ export default function Projects() {
                   <button
                     onClick={exportPDF}
                     disabled={!selectedProject || projectSessions.length === 0 || exporting}
-                    className="px-5 py-3 bg-blue-600 text-white rounded-lg font-semibold hover:bg-blue-700 transition disabled:opacity-50 disabled:cursor-not-allowed whitespace-nowrap"
+                    className="px-5 py-3 bg-blue-600 text-white rounded-lg font-semibold hover:bg-blue-700 transition disabled:opacity-50 disabled:cursor-not-allowed whitespace-nowrap relative"
                   >
-                    {exporting ? 'Generando…' : '↓ Exportar PDF'}
+                    {exporting ? 'Generando…' : (
+                      <>
+                        {!isPro && <span className="mr-1">🔒</span>}
+                        ↓ Exportar PDF
+                      </>
+                    )}
                   </button>
                 </div>
               </div>
@@ -753,6 +767,80 @@ export default function Projects() {
             }`}
           >
             {toast.msg}
+          </div>
+        )}
+
+        {/* Upgrade modal */}
+        {showUpgradeModal && (
+          <div
+            className="fixed inset-0 z-50 bg-slate-900/50 backdrop-blur-sm flex items-center justify-center p-4"
+            onClick={() => setShowUpgradeModal(false)}
+          >
+            <div
+              className="bg-white rounded-2xl p-8 max-w-md w-full shadow-2xl"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <div className="text-center mb-6">
+                <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-br from-blue-600 to-blue-700 rounded-full mb-4">
+                  <span className="text-3xl">📄</span>
+                </div>
+                <h3 className="font-bold text-2xl text-slate-900 mb-2">
+                  Exportar PDF es Pro
+                </h3>
+                <p className="text-sm text-slate-600">
+                  Genera informes profesionales con gráficos y tabla detallada de sesiones, listos para enviar a tus clientes.
+                </p>
+              </div>
+
+              <ul className="space-y-2 mb-6 text-sm">
+                <li className="flex items-center gap-2 text-slate-700">
+                  <span className="text-emerald-600 font-bold">✓</span>
+                  PDF profesional con gráficos
+                </li>
+                <li className="flex items-center gap-2 text-slate-700">
+                  <span className="text-emerald-600 font-bold">✓</span>
+                  Proyectos ilimitados
+                </li>
+                <li className="flex items-center gap-2 text-slate-700">
+                  <span className="text-emerald-600 font-bold">✓</span>
+                  Histórico completo
+                </li>
+              </ul>
+
+              <div className="text-center mb-4">
+                <p className="text-3xl font-bold text-slate-900">14,99 €<span className="text-base font-normal text-slate-500">/mes</span></p>
+              </div>
+
+              <div className="flex gap-3">
+                <button
+                  onClick={() => setShowUpgradeModal(false)}
+                  className="flex-1 px-4 py-3 bg-slate-100 text-slate-700 rounded-lg font-semibold hover:bg-slate-200 transition"
+                >
+                  Ahora no
+                </button>
+                <button
+                  onClick={async () => {
+                    setShowUpgradeModal(false);
+                    try {
+                      const { data: sessionData } = await supabase.auth.getSession();
+                      const res = await fetch('/api/stripe/checkout', {
+                        method: 'POST',
+                        headers: {
+                          Authorization: `Bearer ${sessionData.session.access_token}`,
+                        },
+                      });
+                      const json = await res.json();
+                      if (json.url) window.location.href = json.url;
+                    } catch (e) {
+                      showToast('error', 'Error abriendo checkout');
+                    }
+                  }}
+                  className="flex-1 px-4 py-3 bg-blue-600 text-white rounded-lg font-bold hover:bg-blue-700 transition"
+                >
+                  Upgrade
+                </button>
+              </div>
+            </div>
           </div>
         )}
       </div>
