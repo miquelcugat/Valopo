@@ -11,6 +11,7 @@ export default function Dashboard() {
   const [user, setUser] = useState(null);
   const [projects, setProjects] = useState([]);
   const [sessions, setSessions] = useState([]);
+  const [clients, setClients] = useState([]);
   const [loading, setLoading] = useState(true);
   const [activeProject, setActiveProject] = useState('');
 
@@ -25,12 +26,14 @@ export default function Dashboard() {
   // Forms
   const [newProjectName, setNewProjectName] = useState('');
   const [newProjectRate, setNewProjectRate] = useState('');
+  const [newProjectClientId, setNewProjectClientId] = useState('');
   const [savingProject, setSavingProject] = useState(false);
 
   // Edit project
   const [editingId, setEditingId] = useState(null);
   const [editName, setEditName] = useState('');
   const [editRate, setEditRate] = useState('');
+  const [editClientId, setEditClientId] = useState('');
 
   // Confirm delete
   const [confirmDelete, setConfirmDelete] = useState(null);
@@ -111,25 +114,35 @@ export default function Dashboard() {
 
   const loadData = async (userId) => {
     try {
-      const [{ data: projectsData, error: pErr }, { data: sessionsData, error: sErr }] =
-        await Promise.all([
-          supabase
-            .from('projects')
-            .select('*')
-            .eq('user_id', userId)
-            .order('created_at', { ascending: false }),
-          supabase
-            .from('sessions')
-            .select('*')
-            .eq('user_id', userId)
-            .order('created_at', { ascending: false }),
-        ]);
+      const [
+        { data: projectsData, error: pErr },
+        { data: sessionsData, error: sErr },
+        { data: clientsData, error: cErr },
+      ] = await Promise.all([
+        supabase
+          .from('projects')
+          .select('*')
+          .eq('user_id', userId)
+          .order('created_at', { ascending: false }),
+        supabase
+          .from('sessions')
+          .select('*')
+          .eq('user_id', userId)
+          .order('created_at', { ascending: false }),
+        supabase
+          .from('clients')
+          .select('id, name')
+          .eq('user_id', userId)
+          .order('name', { ascending: true }),
+      ]);
 
       if (pErr) throw pErr;
       if (sErr) throw sErr;
+      if (cErr) throw cErr;
 
       setProjects(projectsData || []);
       setSessions(sessionsData || []);
+      setClients(clientsData || []);
 
       setActiveProject((prev) => {
         if (prev && (projectsData || []).some((p) => p.id === prev)) return prev;
@@ -311,7 +324,14 @@ export default function Dashboard() {
     try {
       const { data, error } = await supabase
         .from('projects')
-        .insert([{ user_id: user.id, name, rate }])
+        .insert([
+          {
+            user_id: user.id,
+            name,
+            rate,
+            client_id: newProjectClientId || null,
+          },
+        ])
         .select();
 
       if (error) throw error;
@@ -323,6 +343,7 @@ export default function Dashboard() {
       }
       setNewProjectName('');
       setNewProjectRate('');
+      setNewProjectClientId('');
       showToast('success', 'Proyecto creado');
       loadData(user.id);
     } catch (error) {
@@ -337,12 +358,14 @@ export default function Dashboard() {
     setEditingId(project.id);
     setEditName(project.name);
     setEditRate(String(project.rate));
+    setEditClientId(project.client_id || '');
   };
 
   const cancelEdit = () => {
     setEditingId(null);
     setEditName('');
     setEditRate('');
+    setEditClientId('');
   };
 
   const saveEdit = async () => {
@@ -355,11 +378,19 @@ export default function Dashboard() {
     try {
       const { error } = await supabase
         .from('projects')
-        .update({ name, rate })
+        .update({
+          name,
+          rate,
+          client_id: editClientId || null,
+        })
         .eq('id', editingId);
       if (error) throw error;
       setProjects((prev) =>
-        prev.map((p) => (p.id === editingId ? { ...p, name, rate } : p))
+        prev.map((p) =>
+          p.id === editingId
+            ? { ...p, name, rate, client_id: editClientId || null }
+            : p
+        )
       );
       cancelEdit();
       showToast('success', 'Proyecto actualizado');
@@ -491,15 +522,15 @@ export default function Dashboard() {
                 Mis proyectos
               </button>
               <button
+                onClick={() => router.push('/clients')}
+                className="px-3 sm:px-4 py-2 text-sm text-slate-600 hover:bg-slate-100 rounded-lg transition font-medium"
+              >
+                Mis clientes
+              </button>
+              <button
                 onClick={() => router.push('/account')}
                 className="px-3 sm:px-4 py-2 text-sm text-slate-600 hover:bg-slate-100 rounded-lg transition font-medium"
               >
-                   Mis clientes
-</button>
-<button
-  onClick={() => router.push('/account')}
-  className="px-3 sm:px-4 py-2 text-sm text-slate-600 hover:bg-slate-100 rounded-lg transition font-medium"
->
                 Mi cuenta
               </button>
               <span className="text-sm text-slate-600 hidden md:inline">{user?.email}</span>
@@ -680,32 +711,60 @@ export default function Dashboard() {
                   </button>
                 </div>
               ) : (
-                <div className="grid sm:grid-cols-[1fr_180px_auto] gap-3">
-                  <input
-                    type="text"
-                    placeholder="Nombre del proyecto"
-                    value={newProjectName}
-                    onChange={(e) => setNewProjectName(e.target.value)}
-                    onKeyDown={(e) => e.key === 'Enter' && addProject()}
-                    className="px-4 py-3 bg-white border border-slate-300 rounded-lg focus:outline-none focus:border-blue-600 focus:ring-2 focus:ring-blue-100 transition"
-                  />
-                  <input
-                    type="number"
-                    step="0.01"
-                    min="0"
-                    placeholder="Tarifa €/hora"
-                    value={newProjectRate}
-                    onChange={(e) => setNewProjectRate(e.target.value)}
-                    onKeyDown={(e) => e.key === 'Enter' && addProject()}
-                    className="px-4 py-3 bg-white border border-slate-300 rounded-lg focus:outline-none focus:border-blue-600 focus:ring-2 focus:ring-blue-100 transition tabular-nums"
-                  />
-                  <button
-                    onClick={addProject}
-                    disabled={savingProject}
-                    className="px-6 py-3 bg-blue-600 text-white rounded-lg font-bold hover:bg-blue-700 active:scale-[0.99] transition disabled:opacity-60 whitespace-nowrap"
-                  >
-                    {savingProject ? 'Creando…' : '+ Añadir'}
-                  </button>
+                <div className="space-y-3">
+                  <div className="grid sm:grid-cols-[1fr_180px_auto] gap-3">
+                    <input
+                      type="text"
+                      placeholder="Nombre del proyecto"
+                      value={newProjectName}
+                      onChange={(e) => setNewProjectName(e.target.value)}
+                      onKeyDown={(e) => e.key === 'Enter' && addProject()}
+                      className="px-4 py-3 bg-white border border-slate-300 rounded-lg focus:outline-none focus:border-blue-600 focus:ring-2 focus:ring-blue-100 transition"
+                    />
+                    <input
+                      type="number"
+                      step="0.01"
+                      min="0"
+                      placeholder="Tarifa €/hora"
+                      value={newProjectRate}
+                      onChange={(e) => setNewProjectRate(e.target.value)}
+                      onKeyDown={(e) => e.key === 'Enter' && addProject()}
+                      className="px-4 py-3 bg-white border border-slate-300 rounded-lg focus:outline-none focus:border-blue-600 focus:ring-2 focus:ring-blue-100 transition tabular-nums"
+                    />
+                    <button
+                      onClick={addProject}
+                      disabled={savingProject}
+                      className="px-6 py-3 bg-blue-600 text-white rounded-lg font-bold hover:bg-blue-700 active:scale-[0.99] transition disabled:opacity-60 whitespace-nowrap"
+                    >
+                      {savingProject ? 'Creando…' : '+ Añadir'}
+                    </button>
+                  </div>
+                  {clients.length > 0 ? (
+                    <select
+                      value={newProjectClientId}
+                      onChange={(e) => setNewProjectClientId(e.target.value)}
+                      className="w-full px-4 py-2.5 bg-white border border-slate-300 rounded-lg focus:outline-none focus:border-blue-600 focus:ring-2 focus:ring-blue-100 transition text-sm"
+                    >
+                      <option value="">— Sin cliente asignado (opcional) —</option>
+                      {clients.map((c) => (
+                        <option key={c.id} value={c.id}>
+                          {c.name}
+                        </option>
+                      ))}
+                    </select>
+                  ) : (
+                    <p className="text-xs text-slate-500">
+                      💡 ¿Quieres asignar este proyecto a un cliente?{' '}
+                      <button
+                        type="button"
+                        onClick={() => router.push('/clients')}
+                        className="text-blue-600 hover:underline font-semibold"
+                      >
+                        Crea tu primer cliente
+                      </button>
+                      .
+                    </p>
+                  )}
                 </div>
               )}
             </div>
@@ -726,39 +785,60 @@ export default function Dashboard() {
                 return (
                   <div key={project.id} className="p-5 sm:p-6 hover:bg-slate-50/50 transition">
                     {isEditing ? (
-                      <div className="grid sm:grid-cols-[1fr_140px_auto] gap-3 items-center">
-                        <input
-                          type="text"
-                          value={editName}
-                          onChange={(e) => setEditName(e.target.value)}
-                          className="px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:border-blue-600"
-                        />
-                        <input
-                          type="number"
-                          step="0.01"
-                          value={editRate}
-                          onChange={(e) => setEditRate(e.target.value)}
-                          className="px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:border-blue-600 tabular-nums"
-                        />
-                        <div className="flex gap-2">
-                          <button
-                            onClick={saveEdit}
-                            className="px-4 py-2 bg-blue-600 text-white rounded-lg font-semibold hover:bg-blue-700 transition text-sm"
-                          >
-                            Guardar
-                          </button>
-                          <button
-                            onClick={cancelEdit}
-                            className="px-4 py-2 bg-slate-100 text-slate-700 rounded-lg font-semibold hover:bg-slate-200 transition text-sm"
-                          >
-                            Cancelar
-                          </button>
+                      <div className="space-y-3">
+                        <div className="grid sm:grid-cols-[1fr_140px_auto] gap-3 items-center">
+                          <input
+                            type="text"
+                            value={editName}
+                            onChange={(e) => setEditName(e.target.value)}
+                            className="px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:border-blue-600"
+                          />
+                          <input
+                            type="number"
+                            step="0.01"
+                            value={editRate}
+                            onChange={(e) => setEditRate(e.target.value)}
+                            className="px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:border-blue-600 tabular-nums"
+                          />
+                          <div className="flex gap-2">
+                            <button
+                              onClick={saveEdit}
+                              className="px-4 py-2 bg-blue-600 text-white rounded-lg font-semibold hover:bg-blue-700 transition text-sm"
+                            >
+                              Guardar
+                            </button>
+                            <button
+                              onClick={cancelEdit}
+                              className="px-4 py-2 bg-slate-100 text-slate-700 rounded-lg font-semibold hover:bg-slate-200 transition text-sm"
+                            >
+                              Cancelar
+                            </button>
+                          </div>
                         </div>
+                        {clients.length > 0 && (
+                          <select
+                            value={editClientId}
+                            onChange={(e) => setEditClientId(e.target.value)}
+                            className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:border-blue-600 text-sm"
+                          >
+                            <option value="">— Sin cliente asignado —</option>
+                            {clients.map((c) => (
+                              <option key={c.id} value={c.id}>
+                                {c.name}
+                              </option>
+                            ))}
+                          </select>
+                        )}
                       </div>
                     ) : (
                       <div className="flex flex-wrap justify-between items-center gap-4">
                         <div className="flex-1 min-w-0">
                           <h3 className="font-bold text-slate-900 truncate">{project.name}</h3>
+                          {project.client_id && (
+                            <p className="text-xs text-slate-500 mt-0.5 truncate">
+                              👤 {clients.find((c) => c.id === project.client_id)?.name || 'Cliente borrado'}
+                            </p>
+                          )}
                           <p className="text-sm text-slate-500 mt-0.5 tabular-nums">
                             €{project.rate}/h · {hours.toFixed(1)}h ·{' '}
                             <span className="text-emerald-600 font-semibold">{formatEUR(earnings)}</span>
