@@ -1,4 +1,5 @@
 import Head from 'next/head';
+import Link from 'next/link';
 import { useRouter } from 'next/router';
 
 export default function Home() {
@@ -92,7 +93,7 @@ export default function Home() {
               <div className="p-8 bg-white rounded-2xl shadow-sm hover:shadow-lg hover:-translate-y-1 transition-all">
                 <div className="text-5xl mb-4">⏰</div>
                 <h3 className="font-bold text-xl text-gray-900 mb-3">Timer Real en Vivo</h3>
-                <p className="text-gray-600">Clickea "empezar" y cada segundo cuenta. Sin complicaciones.</p>
+                <p className="text-gray-600">Clickea &quot;empezar&quot; y cada segundo cuenta. Sin complicaciones.</p>
               </div>
 
               <div className="p-8 bg-white rounded-2xl shadow-sm hover:shadow-lg hover:-translate-y-1 transition-all">
@@ -133,8 +134,8 @@ export default function Home() {
             <div className="bg-gradient-to-br from-blue-600 to-blue-700 rounded-2xl p-12 text-white text-center shadow-xl">
               <div className="text-5xl mb-6">⭐⭐⭐⭐⭐</div>
               <p className="text-xl mb-6 leading-relaxed">
-                "Usé Timely una semana y descubrí que estaba cobrando €18/h cuando podría cobrar €40. 
-                <strong> Subí precios y ahora gano €600 más al mes. Increíble."</strong>
+                &quot;Usé Timely una semana y descubrí que estaba cobrando €18/h cuando podría cobrar €40. 
+                <strong> Subí precios y ahora gano €600 más al mes. Increíble.&quot;</strong>
               </p>
               <p className="text-blue-100">— Freelancer, Madrid (Diseño UX)</p>
             </div>
@@ -204,13 +205,14 @@ export default function Home() {
               <div>
                 <h4 className="font-bold text-white mb-3">Legal</h4>
                 <ul className="space-y-2 text-sm">
-                  <li><a href="#" className="hover:text-white transition">Privacidad</a></li>
-                  <li><a href="#" className="hover:text-white transition">Términos</a></li>
+                  <li><Link href="/terminos" className="hover:text-white transition">Términos</Link></li>
+                  <li><Link href="/privacidad" className="hover:text-white transition">Privacidad</Link></li>
+                  <li><Link href="/cookies" className="hover:text-white transition">Cookies</Link></li>
                 </ul>
               </div>
             </div>
             <div className="border-t border-gray-800 pt-8">
-              <p className="text-center text-sm">© 2024 Timely. Hecho con ❤️ para freelancers.</p>
+              <p className="text-center text-sm">© {new Date().getFullYear()} Timely. Hecho con ❤️ para freelancers.</p>
             </div>
           </div>
         </footer>
