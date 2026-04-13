@@ -236,12 +236,24 @@ export default function Clients() {
                 </span>
               </div>
             </Link>
-            <div className="flex items-center gap-2 sm:gap-4">
+          <div className="flex items-center gap-2 sm:gap-4">
               <Link
                 href="/dashboard"
                 className="px-3 sm:px-4 py-2 text-sm text-slate-600 hover:bg-slate-100 rounded-lg transition font-medium"
               >
-                ← Dashboard
+                Dashboard
+              </Link>
+              <Link
+                href="/projects"
+                className="px-3 sm:px-4 py-2 text-sm text-slate-600 hover:bg-slate-100 rounded-lg transition font-medium"
+              >
+                Proyectos
+              </Link>
+              <Link
+                href="/invoices"
+                className="px-3 sm:px-4 py-2 text-sm text-slate-600 hover:bg-slate-100 rounded-lg transition font-medium"
+              >
+                Facturas
               </Link>
             </div>
           </nav>
