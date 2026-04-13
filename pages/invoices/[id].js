@@ -123,10 +123,338 @@ export default function InvoiceDetail() {
     }
   };
 
-  // ---------- PDF placeholder ----------
-  const downloadPDF = () => {
-    showToast('error', 'La descarga del PDF estará disponible muy pronto');
-  };
+  // ---------- PDF generation ----------
+  const downloadPDF = async () => {
+    try {
+      showToast('success', 'Generando PDF…');
+      const { default: jsPDF } = await import('jspdf');
+
+      const pdf = new jsPDF('p', 'mm', 'a4');
+      const pageWidth = pdf.internal.pageSize.getWidth();
+      const pageHeight = pdf.internal.pageSize.getHeight();
+      const margin = 15;
+      const contentWidth = pageWidth - margin * 2;
+
+      // Brand colors
+      const colorPrimary = [37, 99, 235];      // blue-600
+      const colorDark = [15, 23, 42];          // slate-900
+      const colorMuted = [100, 116, 139];      // slate-500
+      const colorBorder = [226, 232, 240];     // slate-200
+      const colorBg = [248, 250, 252];         // slate-50
+      const colorRed = [220, 38, 38];          // red-600
+      const colorGreen = [22, 163, 74];        // green-600
+
+      // Helper: load image as base64
+      const loadImageAsBase64 = (url) =>
+        new Promise((resolve) => {
+          const img = new Image();
+          img.crossOrigin = 'anonymous';
+          img.onload = () => {
+            const canvas = document.createElement('canvas');
+            canvas.width = img.width;
+            canvas.height = img.height;
+            const ctx = canvas.getContext('2d');
+            ctx.drawImage(img, 0, 0);
+            try {
+              resolve({
+                data: canvas.toDataURL('image/png'),
+                width: img.width,
+                height: img.height,
+              });
+            } catch {
+              resolve(null);
+            }
+          };
+          img.onerror = () => resolve(null);
+          img.src = url;
+        });
+
+      // Try to load logo
+      let logoData = null;
+      if (freelancer.logo_url) {
+        logoData = await loadImageAsBase64(freelancer.logo_url);
+      }
+
+      let y = margin;
+
+      // ============== HEADER ==============
+      // Logo (left)
+      const logoMaxSize = 22;
+      let headerLeftX = margin;
+      if (logoData) {
+        const ratio = logoData.width / logoData.height;
+        let logoW, logoH;
+        if (ratio > 1) {
+          logoW = logoMaxSize;
+          logoH = logoMaxSize / ratio;
+        } else {
+          logoH = logoMaxSize;
+          logoW = logoMaxSize * ratio;
+        }
+        try {
+          pdf.addImage(logoData.data, 'PNG', margin, y, logoW, logoH);
+          headerLeftX = margin + logoW + 4;
+        } catch {}
+      }
+
+      // Freelancer info (next to logo)
+      pdf.setTextColor(...colorDark);
+      pdf.setFontSize(14);
+      pdf.setFont('helvetica', 'bold');
+      pdf.text(freelancer.legal_name || '—', headerLeftX, y + 5);
+
+      pdf.setFontSize(8);
+      pdf.setFont('helvetica', 'normal');
+      pdf.setTextColor(...colorMuted);
+      let infoY = y + 10;
+      if (freelancer.trade_name) {
+        pdf.text(freelancer.trade_name, headerLeftX, infoY);
+        infoY += 3.5;
+      }
+      if (freelancer.tax_id) {
+        pdf.text(`NIF: ${freelancer.tax_id}`, headerLeftX, infoY);
+        infoY += 3.5;
+      }
+      if (freelancer.address) {
+        pdf.text(freelancer.address, headerLeftX, infoY);
+        infoY += 3.5;
+      }
+      if (freelancer.postal_code || freelancer.city) {
+        pdf.text(
+          `${freelancer.postal_code || ''} ${freelancer.city || ''}`.trim(),
+          headerLeftX,
+          infoY
+        );
+        infoY += 3.5;
+      }
+      if (freelancer.email) {
+        pdf.text(freelancer.email, headerLeftX, infoY);
+        infoY += 3.5;
+      }
+
+      // Invoice number box (top right)
+      const boxX = pageWidth - margin - 70;
+      const boxY = y;
+      pdf.setFillColor(...colorPrimary);
+      pdf.rect(boxX, boxY, 70, 8, 'F');
+      pdf.setTextColor(255, 255, 255);
+      pdf.setFontSize(9);
+      pdf.setFont('helvetica', 'bold');
+      pdf.text('FACTURA', boxX + 3, boxY + 5.5);
+
+      pdf.setDrawColor(...colorBorder);
+      pdf.setFillColor(255, 255, 255);
+      pdf.rect(boxX, boxY + 8, 70, 22, 'FD');
+
+      pdf.setTextColor(...colorDark);
+      pdf.setFontSize(14);
+      pdf.setFont('helvetica', 'bold');
+      pdf.text(invoice.invoice_number, boxX + 3, boxY + 16);
+
+      pdf.setFontSize(8);
+      pdf.setFont('helvetica', 'normal');
+      pdf.setTextColor(...colorMuted);
+      pdf.text('Fecha emisión:', boxX + 3, boxY + 22);
+      pdf.setTextColor(...colorDark);
+      pdf.text(formatDateForPdf(invoice.issue_date), boxX + 30, boxY + 22);
+
+      if (invoice.due_date) {
+        pdf.setTextColor(...colorMuted);
+        pdf.text('Vencimiento:', boxX + 3, boxY + 27);
+        pdf.setTextColor(...colorDark);
+        pdf.text(formatDateForPdf(invoice.due_date), boxX + 30, boxY + 27);
+      }
+
+      y = Math.max(infoY, boxY + 32) + 8;
+
+      // ============== BILL TO ==============
+      pdf.setFillColor(...colorBg);
+      pdf.rect(margin, y, contentWidth, 28, 'F');
+
+      pdf.setTextColor(...colorMuted);
+      pdf.setFontSize(8);
+      pdf.setFont('helvetica', 'bold');
+      pdf.text('FACTURAR A', margin + 3, y + 5);
+
+      pdf.setTextColor(...colorDark);
+      pdf.setFontSize(11);
+      pdf.text(client.name || '—', margin + 3, y + 11);
+
+      pdf.setFontSize(8);
+      pdf.setFont('helvetica', 'normal');
+      pdf.setTextColor(...colorMuted);
+      let billY = y + 16;
+      if (client.tax_id) {
+        pdf.text(`NIF: ${client.tax_id}`, margin + 3, billY);
+        billY += 3.5;
+      }
+      if (client.address) {
+        pdf.text(client.address, margin + 3, billY);
+        billY += 3.5;
+      }
+      if (client.postal_code || client.city) {
+        pdf.text(
+          `${client.postal_code || ''} ${client.city || ''}`.trim(),
+          margin + 3,
+          billY
+        );
+      }
+
+      y += 35;
+
+      // ============== LINES TABLE ==============
+      const colDescX = margin;
+      const colQtyX = margin + contentWidth - 65;
+      const colPriceX = margin + contentWidth - 40;
+      const colAmountX = margin + contentWidth;
+
+      // Header row
+      pdf.setFillColor(...colorPrimary);
+      pdf.rect(margin, y, contentWidth, 7, 'F');
+      pdf.setTextColor(255, 255, 255);
+      pdf.setFontSize(8);
+      pdf.setFont('helvetica', 'bold');
+      pdf.text('DESCRIPCIÓN', colDescX + 2, y + 5);
+      pdf.text('CANT.', colQtyX, y + 5, { align: 'right' });
+      pdf.text('PRECIO', colPriceX, y + 5, { align: 'right' });
+      pdf.text('IMPORTE', colAmountX - 2, y + 5, { align: 'right' });
+      y += 7;
+
+      // Lines
+      pdf.setFont('helvetica', 'normal');
+      pdf.setFontSize(8);
+      pdf.setTextColor(...colorDark);
+
+      lines.forEach((line, idx) => {
+        // Wrap description if too long
+        const descLines = pdf.splitTextToSize(
+          line.description || '',
+          contentWidth - 75
+        );
+        const rowHeight = Math.max(6, descLines.length * 4 + 2);
+
+        // Page break if needed
+        if (y + rowHeight + 50 > pageHeight - margin) {
+          pdf.addPage();
+          y = margin;
+          // Mini header on new page
+          pdf.setFontSize(8);
+          pdf.setFont('helvetica', 'italic');
+          pdf.setTextColor(...colorMuted);
+          pdf.text(
+            `Factura ${invoice.invoice_number} · continuación`,
+            margin,
+            y
+          );
+          y += 6;
+          // Re-draw column headers
+          pdf.setFillColor(...colorPrimary);
+          pdf.rect(margin, y, contentWidth, 7, 'F');
+          pdf.setTextColor(255, 255, 255);
+          pdf.setFont('helvetica', 'bold');
+          pdf.text('DESCRIPCIÓN', colDescX + 2, y + 5);
+          pdf.text('CANT.', colQtyX, y + 5, { align: 'right' });
+          pdf.text('PRECIO', colPriceX, y + 5, { align: 'right' });
+          pdf.text('IMPORTE', colAmountX - 2, y + 5, { align: 'right' });
+          y += 7;
+          pdf.setFont('helvetica', 'normal');
+          pdf.setFontSize(8);
+          pdf.setTextColor(...colorDark);
+        }
+
+        // Alternating row background
+        if (idx % 2 === 0) {
+          pdf.setFillColor(...colorBg);
+          pdf.rect(margin, y, contentWidth, rowHeight, 'F');
+        }
+
+        pdf.text(descLines, colDescX + 2, y + 4);
+        pdf.text(`${Number(line.quantity).toFixed(2)}h`, colQtyX, y + 4, {
+          align: 'right',
+        });
+        pdf.text(formatEurForPdf(line.unit_price), colPriceX, y + 4, {
+          align: 'right',
+        });
+        pdf.setFont('helvetica', 'bold');
+        pdf.text(formatEurForPdf(line.amount), colAmountX - 2, y + 4, {
+          align: 'right',
+        });
+        pdf.setFont('helvetica', 'normal');
+
+        y += rowHeight;
+      });
+
+      // Bottom border of table
+      pdf.setDrawColor(...colorBorder);
+      pdf.setLineWidth(0.3);
+      pdf.line(margin, y, margin + contentWidth, y);
+      y += 5;
+
+      // ============== TOTALS ==============
+      const totalsX = margin + contentWidth - 65;
+      pdf.setFontSize(9);
+
+      pdf.setTextColor(...colorMuted);
+      pdf.text('Subtotal', totalsX, y);
+      pdf.setTextColor(...colorDark);
+      pdf.text(formatEurForPdf(invoice.subtotal), colAmountX - 2, y, {
+        align: 'right',
+      });
+      y += 5;
+
+      pdf.setTextColor(...colorMuted);
+      pdf.text(`IVA (${invoice.vat_rate}%)`, totalsX, y);
+      pdf.setTextColor(...colorDark);
+      pdf.text(`+ ${formatEurForPdf(invoice.vat_amount)}`, colAmountX - 2, y, {
+        align: 'right',
+      });
+      y += 5;
+
+      if (Number(invoice.irpf_rate) > 0) {
+        pdf.setTextColor(...colorMuted);
+        pdf.text(`IRPF (${invoice.irpf_rate}%)`, totalsX, y);
+        pdf.setTextColor(...colorRed);
+        pdf.text(`− ${formatEurForPdf(invoice.irpf_amount)}`, colAmountX - 2, y, {
+          align: 'right',
+        });
+        y += 5;
+      }
+
+      // Total line
+      y += 1;
+      pdf.setDrawColor(...colorDark);
+      pdf.setLineWidth(0.5);
+      pdf.line(totalsX, y, colAmountX, y);
+      y += 5;
+
+      pdf.setFontSize(13);
+      pdf.setFont('helvetica', 'bold');
+      pdf.setTextColor(...colorDark);
+      pdf.text('TOTAL', totalsX, y);
+      pdf.setTextColor(...colorPrimary);
+      pdf.text(formatEurForPdf(invoice.total), colAmountX - 2, y, {
+        align: 'right',
+      });
+      y += 12;
+
+      // ============== PAYMENT TERMS & BANK ==============
+      if (invoice.payment_terms || freelancer.iban) {
+        if (y + 30 > pageHeight - margin) {
+          pdf.addPage();
+          y = margin;
+        }
+
+        pdf.setFillColor(...colorBg);
+        const blockHeight =
+          (invoice.payment_terms ? 12 : 0) + (freelancer.iban ? 12 : 0) + 4;
+        pdf.rect(margin, y, contentWidth, blockHeight, 'F');
+
+        let blockY = y + 5;
+        if (invoice.payment_terms) {
+          pdf.setFontSize(7);
+          pdf.setFont('helvetica', 'bold');
+          pdf.setTextColor(...colorMuted);
+          pd
 
   // ---------- Helpers ----------
   const formatEUR = (n) =>
