@@ -768,9 +768,7 @@ export default function Dashboard() {
                 <div className="lg:col-span-2 bg-white rounded-2xl border border-slate-200 shadow-sm p-6">
                   <div className="flex items-baseline justify-between mb-3 flex-wrap gap-2">
                     <div className="flex items-start gap-3">
-                      <div className="w-10 h-10 bg-blue-50 rounded-lg flex items-center justify-center flex-shrink-0">
-                        <Target className="w-5 h-5 text-blue-600" strokeWidth={2.25} />
-                      </div>
+                      <Target className="w-6 h-6 text-blue-600 flex-shrink-0 mt-1" strokeWidth={2.25} />
                       <div>
                         <p className="text-xs font-bold text-slate-500 uppercase tracking-wide">
                           Tu objetivo del mes
@@ -828,9 +826,7 @@ export default function Dashboard() {
                   className={`${hourlyBg} ${hourlyBorder} border rounded-2xl p-6 shadow-sm`}
                 >
                   <div className="flex items-start gap-3 mb-1">
-                    <div className="w-10 h-10 bg-blue-50 rounded-lg flex items-center justify-center flex-shrink-0">
-                      <TrendingUp className="w-5 h-5 text-blue-600" strokeWidth={2.25} />
-                    </div>
+                    <TrendingUp className="w-6 h-6 text-blue-600 flex-shrink-0 mt-1" strokeWidth={2.25} />
                     <div className="flex-1 min-w-0">
                       <p className="text-xs font-bold text-slate-500 uppercase tracking-wide">
                         Tu €/h real
@@ -917,9 +913,7 @@ export default function Dashboard() {
           ) : (
             <div className="bg-white border border-dashed border-slate-300 rounded-2xl p-5 mb-6 flex items-center justify-between gap-4 flex-wrap">
               <div className="flex items-start gap-3">
-                <div className="w-10 h-10 bg-blue-50 rounded-lg flex items-center justify-center flex-shrink-0">
-                  <Lightbulb className="w-5 h-5 text-blue-600" strokeWidth={2.25} />
-                </div>
+                <Lightbulb className="w-6 h-6 text-blue-600 flex-shrink-0 mt-1" strokeWidth={2.25} />
                 <div>
                   <p className="text-sm font-semibold text-slate-900">
                     Define tus objetivos de ingresos
