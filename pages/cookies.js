@@ -12,7 +12,7 @@ export default function Cookies() {
   return (
     <>
       <Head>
-        <title>Política de Cookies · Timely</title>
+        <title>Política de Cookies · Valopo</title>
         <meta name="robots" content="index, follow" />
       </Head>
 
@@ -23,7 +23,7 @@ export default function Cookies() {
               <div className="w-10 h-10 bg-gradient-to-br from-blue-600 to-blue-700 rounded-lg flex items-center justify-center shadow-sm">
                 <span className="text-white font-bold text-lg">⏱</span>
               </div>
-              <span className="font-bold text-xl text-slate-900">Timely</span>
+              <span className="font-bold text-xl text-slate-900">Valopo</span>
             </Link>
             <Link
               href="/"
@@ -60,7 +60,7 @@ export default function Cookies() {
                 2. Tipos de cookies que utilizamos
               </h2>
               <p>
-                En Timely utilizamos exclusivamente <strong>cookies técnicas
+                En Valopo utilizamos exclusivamente <strong>cookies técnicas
                 estrictamente necesarias</strong> para el funcionamiento del
                 Servicio. <strong>No utilizamos cookies analíticas, publicitarias
                 ni de terceros con fines de marketing.</strong>
@@ -103,8 +103,8 @@ export default function Cookies() {
                       <td className="p-3">30 minutos</td>
                     </tr>
                     <tr>
-                      <td className="p-3 font-mono text-xs">timely_cookies_accepted</td>
-                      <td className="p-3">Técnica (Timely)</td>
+                      <td className="p-3 font-mono text-xs">Valopo_cookies_accepted</td>
+                      <td className="p-3">Técnica (Valopo)</td>
                       <td className="p-3">
                         Recordar que has aceptado este aviso
                       </td>
@@ -140,7 +140,7 @@ export default function Cookies() {
                 Puedes configurar tu navegador para que rechace cookies o te
                 avise antes de aceptarlas. Sin embargo, ten en cuenta que si
                 desactivas las cookies técnicas necesarias, no podrás iniciar
-                sesión ni procesar pagos en Timely.
+                sesión ni procesar pagos en Valopo.
               </p>
               <p className="mt-3">
                 Aquí tienes los enlaces para gestionar cookies en los principales
