@@ -53,7 +53,7 @@ export default function Auth() {
   return (
     <>
       <Head>
-        <title>{isSignUp ? 'Regístrate' : 'Entra'} - Timely</title>
+        <title>{isSignUp ? 'Regístrate' : 'Entra'} - Valopo</title>
       </Head>
 
       <div className="min-h-screen bg-gradient-to-br from-blue-50 to-gray-50 flex items-center justify-center px-4">
@@ -64,7 +64,7 @@ export default function Auth() {
               <div className="w-16 h-16 bg-blue-600 rounded-lg flex items-center justify-center mx-auto mb-4">
                 <span className="text-white font-bold text-3xl">⏱</span>
               </div>
-              <h1 className="text-2xl font-bold text-gray-900">Timely</h1>
+              <h1 className="text-2xl font-bold text-gray-900">Valopo</h1>
             </div>
 
             {/* Form */}
@@ -139,7 +139,7 @@ export default function Auth() {
 
           {/* Demo Account */}
           <div className="mt-8 text-center text-sm text-gray-600 bg-white p-4 rounded-lg">
-            <p>Demo: usa email test@timely.app / password: demo123</p>
+            <p>Demo: usa email test@Valopo.app / password: demo123</p>
           </div>
         </div>
       </div>
