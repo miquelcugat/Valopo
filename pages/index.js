@@ -8,7 +8,7 @@ export default function Home() {
   return (
     <>
       <Head>
-        <title>Timely - Sabes cuánto ganas por hora</title>
+        <title>Valopo - Sabes cuánto ganas por hora</title>
         <meta name="description" content="Track tus horas, calcula tus ingresos reales. Para freelancers que quieren saber de verdad cuánto ganan." />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
       </Head>
@@ -21,7 +21,7 @@ export default function Home() {
               <div className="w-10 h-10 bg-gradient-to-br from-blue-600 to-blue-700 rounded-xl flex items-center justify-center shadow-lg">
                 <span className="text-white font-bold text-xl">⏱</span>
               </div>
-              <span className="font-bold text-2xl bg-gradient-to-r from-blue-600 to-blue-800 bg-clip-text text-transparent">Timely</span>
+              <span className="font-bold text-2xl bg-gradient-to-r from-blue-600 to-blue-800 bg-clip-text text-transparent">Valopo</span>
             </div>
             <button
               onClick={() => router.push('/login')}
@@ -46,7 +46,7 @@ export default function Home() {
             
             <p className="text-xl text-gray-600 mb-10 max-w-2xl mx-auto leading-relaxed">
               La mayoría de freelancers terminan el mes sin saber si ganaron €800 o €2000. 
-              <strong> Timely te muestra en tiempo real cuánto dinero estás haciendo.</strong>
+              <strong> Valopo te muestra en tiempo real cuánto dinero estás haciendo.</strong>
             </p>
 
             <div className="flex gap-4 justify-center mb-8">
@@ -88,7 +88,7 @@ export default function Home() {
 
           {/* Feature Cards */}
           <div className="mb-20">
-            <h2 className="text-4xl font-bold text-center text-gray-900 mb-12">¿Por qué Timely?</h2>
+            <h2 className="text-4xl font-bold text-center text-gray-900 mb-12">¿Por qué Valopo?</h2>
             <div className="grid md:grid-cols-3 gap-8">
               <div className="p-8 bg-white rounded-2xl shadow-sm hover:shadow-lg hover:-translate-y-1 transition-all">
                 <div className="text-5xl mb-4">⏰</div>
@@ -134,7 +134,7 @@ export default function Home() {
             <div className="bg-gradient-to-br from-blue-600 to-blue-700 rounded-2xl p-12 text-white text-center shadow-xl">
               <div className="text-5xl mb-6">⭐⭐⭐⭐⭐</div>
               <p className="text-xl mb-6 leading-relaxed">
-                &quot;Usé Timely una semana y descubrí que estaba cobrando €18/h cuando podría cobrar €40. 
+                &quot;Usé Valopo una semana y descubrí que estaba cobrando €18/h cuando podría cobrar €40. 
                 <strong> Subí precios y ahora gano €600 más al mes. Increíble.&quot;</strong>
               </p>
               <p className="text-blue-100">— Freelancer, Madrid (Diseño UX)</p>
@@ -184,7 +184,7 @@ export default function Home() {
                   <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center">
                     <span className="text-white font-bold">⏱</span>
                   </div>
-                  <span className="font-bold text-white">Timely</span>
+                  <span className="font-bold text-white">Valopo</span>
                 </div>
                 <p className="text-sm">Para freelancers que quieren saber cuánto ganan.</p>
               </div>
@@ -212,7 +212,7 @@ export default function Home() {
               </div>
             </div>
             <div className="border-t border-gray-800 pt-8">
-              <p className="text-center text-sm">© {new Date().getFullYear()} Timely. Hecho con ❤️ para freelancers.</p>
+              <p className="text-center text-sm">© {new Date().getFullYear()} Valopo. Hecho con ❤️ para freelancers.</p>
             </div>
           </div>
         </footer>
