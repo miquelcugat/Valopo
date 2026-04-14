@@ -98,7 +98,7 @@ export default function Dashboard() {
       await loadData(data.session.user.id);
 
       try {
-        const saved = JSON.parse(localStorage.getItem('timely_timer') || 'null');
+        const saved = JSON.parse(localStorage.getItem('Valopo_timer') || 'null');
         if (saved?.startedAt && saved?.projectId) {
           startedAtRef.current = saved.startedAt;
           setActiveProject(saved.projectId);
@@ -289,7 +289,7 @@ export default function Dashboard() {
     setTimerSeconds(0);
     setIsRunning(true);
     localStorage.setItem(
-      'timely_timer',
+      'Valopo_timer',
       JSON.stringify({ startedAt: now, projectId: activeProject })
     );
   };
@@ -302,7 +302,7 @@ export default function Dashboard() {
 
     setIsRunning(false);
     startedAtRef.current = null;
-    localStorage.removeItem('timely_timer');
+    localStorage.removeItem('Valopo_timer');
 
     if (duration < 1) {
       setTimerSeconds(0);
@@ -399,7 +399,7 @@ export default function Dashboard() {
     setIsRunning(false);
     startedAtRef.current = null;
     setTimerSeconds(0);
-    localStorage.removeItem('timely_timer');
+    localStorage.removeItem('Valopo_timer');
   };
 
   // ---------- Project actions ----------
@@ -585,7 +585,7 @@ export default function Dashboard() {
   return (
     <>
       <Head>
-        <title>Dashboard · Timely</title>
+        <title>Dashboard · Valopo</title>
         <meta name="viewport" content="width=device-width, initial-scale=1" />
       </Head>
 
@@ -598,7 +598,7 @@ export default function Dashboard() {
                 <span className="text-white font-bold text-lg">⏱</span>
               </div>
               <div className="flex items-center gap-2">
-                <span className="font-bold text-xl text-slate-900">Timely</span>
+                <span className="font-bold text-xl text-slate-900">Valopo</span>
                 <span
                   className={`text-xs font-bold px-2 py-0.5 rounded-full ${
                     isPro
@@ -1052,7 +1052,7 @@ export default function Dashboard() {
                 PRO ACTIVO
               </div>
               <h3 className="text-2xl font-bold text-slate-900 mb-2">Eres miembro Pro</h3>
-              <p className="mb-5 text-slate-600">Gracias por confiar en Timely. Gestiona tu suscripción cuando quieras.</p>
+              <p className="mb-5 text-slate-600">Gracias por confiar en Valopo. Gestiona tu suscripción cuando quieras.</p>
               <button
                 onClick={openPortal}
                 disabled={opening}
