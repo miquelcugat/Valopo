@@ -3,11 +3,11 @@ import { useState } from 'react';
 const STEPS = [
   {
     icon: '👋',
-    title: '¡Bienvenido a Timely!',
+    title: '¡Bienvenido a Valopo!',
     subtitle: 'Vamos a darte un tour rápido (1 minuto)',
     body: (
       <p className="text-slate-600 leading-relaxed">
-        Timely es la app que ayuda a freelancers a saber{' '}
+        Valopo es la app que ayuda a freelancers a saber{' '}
         <strong>cuánto ganan de verdad</strong> y a generar facturas
         profesionales en segundos. Vamos a enseñarte lo esencial.
       </p>
@@ -39,7 +39,7 @@ const STEPS = [
       <div className="space-y-3 text-slate-600 leading-relaxed">
         <p>
           Crea un proyecto por cada cliente o tipo de trabajo. Cada proyecto
-          tiene su <strong>tarifa por hora</strong>, así Timely calcula
+          tiene su <strong>tarifa por hora</strong>, así Valopo calcula
           automáticamente cuánto vas ganando.
         </p>
         <p>
@@ -193,7 +193,7 @@ export default function OnboardingTour({ onComplete }) {
             {completing
               ? 'Guardando…'
               : isLast
-              ? '✓ Empezar a usar Timely'
+              ? '✓ Empezar a usar Valopo'
               : 'Siguiente →'}
           </button>
         </div>
