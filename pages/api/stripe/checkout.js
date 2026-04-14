@@ -5,7 +5,6 @@ export default async function handler(req, res) {
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method not allowed' });
   }
-
   try {
     // Get the access token from the Authorization header
     const authHeader = req.headers.authorization;
@@ -25,11 +24,40 @@ export default async function handler(req, res) {
     // Check if there's already a subscription row for this user
     const { data: existingSub } = await supabaseAdmin
       .from('subscriptions')
-      .select('stripe_customer_id')
+      .select('stripe_customer_id, status')
       .eq('user_id', user.id)
       .maybeSingle();
 
     let customerId = existingSub?.stripe_customer_id;
+
+    // ========================================================
+    // GUARD: If user already has an active/trialing subscription
+    // on Stripe, do NOT allow a second checkout. Redirect them
+    // to the billing portal to manage the existing one.
+    // ========================================================
+    if (customerId) {
+      const existingSubscriptions = await stripe.subscriptions.list({
+        customer: customerId,
+        status: 'all',
+        limit: 10,
+      });
+
+      const activeSubs = existingSubscriptions.data.filter(
+        (s) => s.status === 'active' || s.status === 'trialing' || s.status === 'past_due'
+      );
+
+      if (activeSubs.length > 0) {
+        // User already has an active sub. Send them to the billing portal instead.
+        const portalSession = await stripe.billingPortal.sessions.create({
+          customer: customerId,
+          return_url: `${process.env.NEXT_PUBLIC_APP_URL}/account`,
+        });
+        return res.status(200).json({
+          url: portalSession.url,
+          alreadySubscribed: true,
+        });
+      }
+    }
 
     // If the user doesn't have a Stripe customer yet, create one
     if (!customerId) {
@@ -40,7 +68,6 @@ export default async function handler(req, res) {
         },
       });
       customerId = customer.id;
-
       // Save the customer ID immediately so we don't create duplicates
       await supabaseAdmin
         .from('subscriptions')
@@ -81,7 +108,6 @@ export default async function handler(req, res) {
       automatic_tax: { enabled: false },
       // For EU/Spain you should enable automatic_tax later when you set up tax IDs
     });
-
     return res.status(200).json({ url: session.url });
   } catch (error) {
     console.error('Checkout error:', error);
