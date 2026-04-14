@@ -5,7 +5,7 @@
 //   [TU NIF]      → tu NIF/DNI con letra (ej: 12345678A)
 //   [TU CIUDAD]   → ciudad de residencia (ej: Barcelona)
 //   [TU EMAIL]    → email de contacto operativo
-//   [TU DOMINIO]  → URL final de tu app (ej: https://timely.app)
+//   [TU DOMINIO]  → URL final de tu app (ej: https://Valopo.app)
 // Sin estos datos rellenados, esta página NO es válida legalmente
 // y Stripe podría bloquear tu cuenta al detectarlo.
 // ============================================================
@@ -17,7 +17,7 @@ export default function Terminos() {
   return (
     <>
       <Head>
-        <title>Términos y Condiciones · Timely</title>
+        <title>Términos y Condiciones · Valopo</title>
         <meta name="robots" content="index, follow" />
       </Head>
 
@@ -28,7 +28,7 @@ export default function Terminos() {
               <div className="w-10 h-10 bg-gradient-to-br from-blue-600 to-blue-700 rounded-lg flex items-center justify-center shadow-sm">
                 <span className="text-white font-bold text-lg">⏱</span>
               </div>
-              <span className="font-bold text-xl text-slate-900">Timely</span>
+              <span className="font-bold text-xl text-slate-900">Valopo</span>
             </Link>
             <Link
               href="/"
@@ -73,7 +73,7 @@ export default function Terminos() {
               </h2>
               <p>
                 Los presentes Términos y Condiciones (en adelante, &quot;los Términos&quot;)
-                regulan el uso de la aplicación Timely (en adelante, &quot;el Servicio&quot;),
+                regulan el uso de la aplicación Valopo (en adelante, &quot;el Servicio&quot;),
                 una herramienta SaaS de seguimiento de tiempo y facturación
                 destinada a profesionales autónomos y freelancers.
               </p>
@@ -107,7 +107,7 @@ export default function Terminos() {
               <h2 className="text-2xl font-bold text-slate-900 mt-8 mb-4">
                 4. Planes y condiciones económicas
               </h2>
-              <p>Timely ofrece dos modalidades de uso:</p>
+              <p>Valopo ofrece dos modalidades de uso:</p>
               <ul className="list-disc pl-6 space-y-2 mt-3">
                 <li>
                   <strong>Plan Free:</strong> gratuito, con funcionalidades
