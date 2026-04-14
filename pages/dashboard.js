@@ -19,7 +19,6 @@ import {
   Sparkles,
   Plus,
 } from 'lucide-react';
-import { Target, TrendingUp, Lightbulb, CheckCircle2 } from 'lucide-react';
 
 export default function Dashboard() {
   const router = useRouter();
