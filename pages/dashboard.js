@@ -48,6 +48,7 @@ export default function Dashboard() {
 
   // Stripe loading
   const [opening, setOpening] = useState(false);
+
   // Onboarding tour
   const [showOnboarding, setShowOnboarding] = useState(false);
   const [onboardingChecked, setOnboardingChecked] = useState(false);
@@ -117,19 +118,11 @@ export default function Dashboard() {
   useEffect(() => {
     if (router.query.upgraded === 'true') {
       showToast('success', '¡Bienvenido a Pro! 🎉');
-      // Clean the URL
       router.replace('/dashboard', undefined, { shallow: true });
     }
   }, [router.query.upgraded, router, showToast]);
 
   const loadData = async (userId) => {
-    try {
-      const [
-        { data: projectsData, error: pErr },
-        { data: sessionsData, error: sErr },
-        { data: clientsData, error: cErr },
-      ] = await Promise.all([
-        const loadData = async (userId) => {
     try {
       const [
         { data: projectsData, error: pErr },
@@ -158,22 +151,6 @@ export default function Dashboard() {
           .eq('user_id', userId)
           .maybeSingle(),
       ]);
-        supabase
-          .from('projects')
-          .select('*')
-          .eq('user_id', userId)
-          .order('created_at', { ascending: false }),
-        supabase
-          .from('sessions')
-          .select('*')
-          .eq('user_id', userId)
-          .order('created_at', { ascending: false }),
-        supabase
-          .from('clients')
-          .select('id, name')
-          .eq('user_id', userId)
-          .order('name', { ascending: true }),
-      ]);
 
       if (pErr) throw pErr;
       if (sErr) throw sErr;
@@ -190,6 +167,7 @@ export default function Dashboard() {
         setShowOnboarding(true);
       }
       setOnboardingChecked(true);
+
       setActiveProject((prev) => {
         if (prev && (projectsData || []).some((p) => p.id === prev)) return prev;
         return projectsData?.[0]?.id || '';
@@ -281,6 +259,7 @@ export default function Dashboard() {
     setUpgradeReason(reason);
     setShowUpgradeModal(true);
   };
+
   const completeOnboarding = async () => {
     try {
       await supabase
@@ -331,7 +310,6 @@ export default function Dashboard() {
       return;
     }
 
-    // Open notes modal with pending session data
     setPendingSession({
       startedAt,
       endedAt,
@@ -385,7 +363,6 @@ export default function Dashboard() {
     showToast('error', 'Sesión descartada');
   };
 
-  // Edit note of an existing session
   const openEditNote = (session) => {
     setEditingNoteSession(session);
     setNoteText(session.notes || '');
@@ -439,7 +416,6 @@ export default function Dashboard() {
       return;
     }
 
-    // Plan limit check
     if (!isPro && projects.length >= limits.maxProjects) {
       triggerUpgrade(
         `Has alcanzado el límite de ${limits.maxProjects} proyectos del plan Free.`
@@ -590,7 +566,6 @@ export default function Dashboard() {
 
   const recentSessions = sessions.slice(0, 8);
 
-  // Project limit info
   const atProjectLimit = !isPro && projects.length >= limits.maxProjects;
   const projectsRemaining = isPro ? Infinity : Math.max(0, limits.maxProjects - projects.length);
 
@@ -654,7 +629,7 @@ export default function Dashboard() {
               >
                 Mis clientes
               </button>
-                      <button
+              <button
                 onClick={() => router.push('/invoices')}
                 className="px-3 sm:px-4 py-2 text-sm text-slate-600 hover:bg-slate-100 rounded-lg transition font-medium"
               >
@@ -1276,8 +1251,10 @@ export default function Dashboard() {
             </div>
           </div>
         )}
-{/* Onboarding tour */}
+
+        {/* Onboarding tour */}
         {showOnboarding && <OnboardingTour onComplete={completeOnboarding} />}
+
         {/* Edit note of existing session modal */}
         {editingNoteSession && (
           <div
