@@ -286,7 +286,7 @@ export default function Account() {
   return (
     <>
       <Head>
-        <title>Mi cuenta · Timely</title>
+        <title>Mi cuenta · Valopo</title>
       </Head>
 
       <div className="min-h-screen bg-slate-50">
@@ -296,7 +296,7 @@ export default function Account() {
               <div className="w-10 h-10 bg-gradient-to-br from-blue-600 to-blue-700 rounded-lg flex items-center justify-center shadow-sm">
                 <span className="text-white font-bold text-lg">⏱</span>
               </div>
-              <span className="font-bold text-xl text-slate-900">Timely</span>
+              <span className="font-bold text-xl text-slate-900">Valopo</span>
             </div>
             <Link
               href="/dashboard"
