@@ -1223,7 +1223,42 @@ export default function Dashboard() {
                     ) : (
                       <div className="flex flex-wrap justify-between items-center gap-4">
                         <div className="flex-1 min-w-0">
-                          <h3 className="font-bold text-slate-900 truncate">{project.name}</h3>
+                          <div className="flex items-center gap-2 flex-wrap">
+                            <h3 className="font-bold text-slate-900 truncate">{project.name}</h3>
+                            {hourlyGoal && (() => {
+                              const r = Number(project.rate) || 0;
+                              const ratio = r / hourlyGoal;
+                              if (ratio >= 1.10) {
+                                return (
+                                  <span className="inline-flex items-center gap-1 text-[10px] font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-200">
+                                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
+                                    Excelente
+                                  </span>
+                                );
+                              } else if (ratio >= 1) {
+                                return (
+                                  <span className="inline-flex items-center gap-1 text-[10px] font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-200">
+                                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
+                                    Rentable
+                                  </span>
+                                );
+                              } else if (ratio >= 0.85) {
+                                return (
+                                  <span className="inline-flex items-center gap-1 text-[10px] font-bold text-amber-700 bg-amber-50 px-2 py-0.5 rounded-full border border-amber-200">
+                                    <span className="w-1.5 h-1.5 rounded-full bg-amber-500" />
+                                    Margen ajustado
+                                  </span>
+                                );
+                              } else {
+                                return (
+                                  <span className="inline-flex items-center gap-1 text-[10px] font-bold text-red-700 bg-red-50 px-2 py-0.5 rounded-full border border-red-200">
+                                    <span className="w-1.5 h-1.5 rounded-full bg-red-500" />
+                                    Por debajo
+                                  </span>
+                                );
+                              }
+                            })()}
+                          </div>
                           {project.client_id && (
                             <p className="text-xs text-slate-500 mt-0.5 truncate inline-flex items-center gap-1">
                               <User className="w-3 h-3" strokeWidth={2.25} />
