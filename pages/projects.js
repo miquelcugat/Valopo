@@ -13,6 +13,20 @@ import {
   Tooltip,
   ResponsiveContainer,
 } from 'recharts';
+import {
+  Clock,
+  TrendingUp,
+  TrendingDown,
+  Target,
+  Mail,
+  MapPin,
+  Lock,
+  FileText,
+  Check,
+  Download,
+  CheckCircle2,
+  AlertCircle,
+} from 'lucide-react';
 import { supabase } from '../lib/supabaseClient';
 import { usePlan } from '../lib/usePlan';
 
@@ -22,9 +36,9 @@ export default function Projects() {
   const [projects, setProjects] = useState([]);
   const [sessions, setSessions] = useState([]);
   const [clients, setClients] = useState([]);
+  const [profile, setProfile] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  // Selection mode: 'project' or 'client'
   const [mode, setMode] = useState('project');
   const [selectedId, setSelectedId] = useState('');
 
@@ -32,14 +46,12 @@ export default function Projects() {
   const [toast, setToast] = useState(null);
   const [showUpgradeModal, setShowUpgradeModal] = useState(false);
 
-  // Plan
   const { isPro, loading: planLoading } = usePlan(user?.id);
 
   const dailyChartRef = useRef(null);
   const weeklyChartRef = useRef(null);
   const hourlyChartRef = useRef(null);
 
-  // ---------- Helpers ----------
   const showToast = (type, msg) => {
     setToast({ type, msg });
     setTimeout(() => setToast(null), 3500);
@@ -62,7 +74,6 @@ export default function Projects() {
   const formatDateShort = (d) =>
     new Intl.DateTimeFormat('es-ES', { day: '2-digit', month: 'short' }).format(d);
 
-  // ---------- Auth & data load ----------
   useEffect(() => {
     let mounted = true;
     const init = async () => {
@@ -88,6 +99,7 @@ export default function Projects() {
         { data: projectsData, error: pErr },
         { data: sessionsData, error: sErr },
         { data: clientsData, error: cErr },
+        { data: profileData },
       ] = await Promise.all([
         supabase
           .from('projects')
@@ -104,6 +116,11 @@ export default function Projects() {
           .select('*')
           .eq('user_id', userId)
           .order('name', { ascending: true }),
+        supabase
+          .from('freelancer_profile')
+          .select('hourly_rate_goal, monthly_income_goal')
+          .eq('user_id', userId)
+          .maybeSingle(),
       ]);
       if (pErr) throw pErr;
       if (sErr) throw sErr;
@@ -112,8 +129,8 @@ export default function Projects() {
       setProjects(projectsData || []);
       setSessions(sessionsData || []);
       setClients(clientsData || []);
+      setProfile(profileData || null);
 
-      // Pre-select project from URL ?id=... or first project
       const fromQuery = router.query.id;
       if (fromQuery && (projectsData || []).some((p) => p.id === fromQuery)) {
         setSelectedId(fromQuery);
@@ -128,7 +145,6 @@ export default function Projects() {
     }
   };
 
-  // Reset selection when mode changes
   useEffect(() => {
     if (mode === 'project') {
       setSelectedId(projects[0]?.id || '');
@@ -140,7 +156,6 @@ export default function Projects() {
     }
   }, [mode]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  // ---------- Computed: which sessions to analyze? ----------
   const selectedProject = mode === 'project' ? projects.find((p) => p.id === selectedId) : null;
   const selectedClient = mode === 'client' ? clients.find((c) => c.id === selectedId) : null;
   const projectClient =
@@ -148,12 +163,10 @@ export default function Projects() {
       ? clients.find((c) => c.id === selectedProject.client_id)
       : null;
 
-  // Sessions to analyze: depends on mode
   const analysisSessions = useMemo(() => {
     if (mode === 'project') {
       return sessions.filter((s) => s.project_id === selectedId);
     } else {
-      // Client mode: all sessions of all projects of this client
       const clientProjectIds = projects
         .filter((p) => p.client_id === selectedId)
         .map((p) => p.id);
@@ -170,7 +183,6 @@ export default function Projects() {
   const sessionHours = (s) => Math.max(0, (s.duration_seconds || 0) / 3600);
   const sessionEarnings = (s) => Number(s.earned || 0);
 
-  // Totals
   const stats = useMemo(() => {
     const totalHours = analysisSessions.reduce((a, s) => a + sessionHours(s), 0);
     const totalEarnings = analysisSessions.reduce((a, s) => a + sessionEarnings(s), 0);
@@ -197,7 +209,82 @@ export default function Projects() {
     };
   }, [analysisSessions]);
 
-  // Daily data — last 30 days
+  // ---------- Profitability analysis (Nivel 1.5) ----------
+  const hourlyGoal = profile?.hourly_rate_goal ? Number(profile.hourly_rate_goal) : null;
+
+  const profitability = useMemo(() => {
+    if (!hourlyGoal) return null;
+
+    let effectiveRate = 0;
+    if (mode === 'project' && selectedProject) {
+      effectiveRate = Number(selectedProject.rate) || 0;
+    } else if (mode === 'client' && clientProjects.length > 0) {
+      const totalH = analysisSessions.reduce((a, s) => a + sessionHours(s), 0);
+      if (totalH > 0) {
+        effectiveRate = analysisSessions.reduce((a, s) => a + sessionEarnings(s), 0) / totalH;
+      } else {
+        effectiveRate =
+          clientProjects.reduce((a, p) => a + (Number(p.rate) || 0), 0) /
+          clientProjects.length;
+      }
+    } else {
+      return null;
+    }
+
+    if (effectiveRate <= 0) return null;
+
+    const ratio = effectiveRate / hourlyGoal;
+    const deltaPct = ((effectiveRate - hourlyGoal) / hourlyGoal) * 100;
+
+    let label, description, bgClass, borderClass, textClass, iconColor, Icon;
+
+    if (ratio >= 1.10) {
+      label = 'Excelente';
+      description = `Te paga ${effectiveRate.toFixed(2)} €/h, un ${Math.abs(deltaPct).toFixed(0)}% por encima de tu objetivo de ${hourlyGoal} €/h. ¡Mantenlo!`;
+      bgClass = 'bg-emerald-50';
+      borderClass = 'border-emerald-200';
+      textClass = 'text-emerald-900';
+      iconColor = 'text-emerald-600';
+      Icon = TrendingUp;
+    } else if (ratio >= 1) {
+      label = 'Rentable';
+      description = `Te paga ${effectiveRate.toFixed(2)} €/h, justo por encima de tu objetivo de ${hourlyGoal} €/h.`;
+      bgClass = 'bg-emerald-50';
+      borderClass = 'border-emerald-200';
+      textClass = 'text-emerald-900';
+      iconColor = 'text-emerald-600';
+      Icon = CheckCircle2;
+    } else if (ratio >= 0.85) {
+      label = 'Margen ajustado';
+      description = `Te paga ${effectiveRate.toFixed(2)} €/h, un ${Math.abs(deltaPct).toFixed(0)}% por debajo de tu objetivo de ${hourlyGoal} €/h. Considera renegociar.`;
+      bgClass = 'bg-amber-50';
+      borderClass = 'border-amber-200';
+      textClass = 'text-amber-900';
+      iconColor = 'text-amber-600';
+      Icon = AlertCircle;
+    } else {
+      label = 'Por debajo del objetivo';
+      description = `Te paga solo ${effectiveRate.toFixed(2)} €/h, un ${Math.abs(deltaPct).toFixed(0)}% por debajo de tu objetivo de ${hourlyGoal} €/h. Estás perdiendo valor con este ${mode === 'project' ? 'proyecto' : 'cliente'}.`;
+      bgClass = 'bg-red-50';
+      borderClass = 'border-red-200';
+      textClass = 'text-red-900';
+      iconColor = 'text-red-600';
+      Icon = TrendingDown;
+    }
+
+    return {
+      label,
+      description,
+      bgClass,
+      borderClass,
+      textClass,
+      iconColor,
+      Icon,
+      effectiveRate,
+      deltaPct,
+    };
+  }, [hourlyGoal, mode, selectedProject, clientProjects, analysisSessions]);
+
   const dailyData = useMemo(() => {
     const days = [];
     const today = new Date();
@@ -224,7 +311,6 @@ export default function Projects() {
     }));
   }, [analysisSessions]);
 
-  // Weekly data — last 12 weeks
   const weeklyData = useMemo(() => {
     const weeks = [];
     const today = new Date();
@@ -256,7 +342,6 @@ export default function Projects() {
     }));
   }, [analysisSessions]);
 
-  // Hourly distribution
   const hourlyData = useMemo(() => {
     const hours = Array.from({ length: 24 }, (_, h) => ({
       hour: `${String(h).padStart(2, '0')}h`,
@@ -275,19 +360,9 @@ export default function Projects() {
     }));
   }, [analysisSessions]);
 
-  // Display title for the analysis
   const analysisTitle =
     mode === 'project' ? selectedProject?.name : selectedClient?.name;
-  const analysisSubtitle =
-    mode === 'project'
-      ? selectedProject
-        ? `€${selectedProject.rate}/h${projectClient ? ` · Cliente: ${projectClient.name}` : ''}`
-        : ''
-      : selectedClient
-      ? `${clientProjects.length} ${clientProjects.length === 1 ? 'proyecto' : 'proyectos'} de este cliente`
-      : '';
 
-  // ---------- Exports ----------
   const exportCSV = () => {
     if (!analysisTitle) return;
 
@@ -371,20 +446,18 @@ export default function Projects() {
       const margin = 15;
       let y = margin;
 
-      // Header
       pdf.setFillColor(37, 99, 235);
       pdf.rect(0, 0, pageWidth, 25, 'F');
       pdf.setTextColor(255, 255, 255);
       pdf.setFontSize(18);
       pdf.setFont('helvetica', 'bold');
       pdf.text(
-        mode === 'project' ? 'Valopo · Informe de proyecto' : 'Valopo · Informe de cliente',
+        mode === 'project' ? 'Valopo - Informe de proyecto' : 'Valopo - Informe de cliente',
         margin,
         16
       );
       y = 35;
 
-      // Title
       pdf.setTextColor(15, 23, 42);
       pdf.setFontSize(22);
       pdf.text(analysisTitle, margin, y);
@@ -399,7 +472,6 @@ export default function Projects() {
       );
       y += 8;
 
-      // Client info block (if applicable)
       const clientForBlock = mode === 'project' ? projectClient : selectedClient;
       if (clientForBlock) {
         pdf.setDrawColor(226, 232, 240);
@@ -420,12 +492,11 @@ export default function Projects() {
           clientForBlock.tax_id ? `NIF: ${clientForBlock.tax_id}` : null,
           clientForBlock.email,
           [clientForBlock.city, clientForBlock.country].filter(Boolean).join(', '),
-        ].filter(Boolean).join('  ·  ');
+        ].filter(Boolean).join('  -  ');
         pdf.text(details, margin + 5, y + 21);
         y += blockHeight + 5;
       }
 
-      // Stats box
       pdf.setDrawColor(226, 232, 240);
       pdf.setFillColor(248, 250, 252);
       pdf.roundedRect(margin, y, pageWidth - margin * 2, 35, 3, 3, 'FD');
@@ -438,7 +509,7 @@ export default function Projects() {
         ['HORAS TOTALES', `${stats.totalHours.toFixed(1)}h`],
         ['INGRESOS', formatEUR(stats.totalEarnings)],
         ['SESIONES', String(stats.sessionCount)],
-        ['MEDIA/SESIÓN', `${stats.avgSessionMin.toFixed(0)} min`],
+        ['MEDIA/SESION', `${stats.avgSessionMin.toFixed(0)} min`],
       ];
       statBoxes.forEach(([label, value], i) => {
         const x = margin + colW * i + 5;
@@ -451,11 +522,10 @@ export default function Projects() {
       });
       y += 45;
 
-      // Charts
       const chartsToCapture = [
-        { ref: dailyChartRef, title: 'Horas por día (últimos 30 días)' },
-        { ref: weeklyChartRef, title: 'Ingresos por semana (últimas 12 semanas)' },
-        { ref: hourlyChartRef, title: 'Distribución por hora del día' },
+        { ref: dailyChartRef, title: 'Horas por dia (ultimos 30 dias)' },
+        { ref: weeklyChartRef, title: 'Ingresos por semana (ultimas 12 semanas)' },
+        { ref: hourlyChartRef, title: 'Distribucion por hora del dia' },
       ];
 
       for (const { ref, title } of chartsToCapture) {
@@ -481,7 +551,6 @@ export default function Projects() {
         y += imgHeight + 10;
       }
 
-      // Sessions table
       pdf.addPage();
       y = margin;
       pdf.setFontSize(14);
@@ -498,7 +567,7 @@ export default function Projects() {
       if (mode === 'client') {
         pdf.text('Proyecto', margin + 40, y + 5);
       }
-      pdf.text('Duración', margin + 110, y + 5);
+      pdf.text('Duracion', margin + 110, y + 5);
       pdf.text('Ganado', margin + 145, y + 5);
       y += 9;
 
@@ -539,7 +608,6 @@ export default function Projects() {
     }
   };
 
-  // ---------- Loading ----------
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-slate-50">
@@ -551,12 +619,10 @@ export default function Projects() {
     );
   }
 
-  // Clients that have at least one project
   const clientsWithProjects = clients.filter((c) =>
     projects.some((p) => p.client_id === c.id)
   );
 
-  // ---------- Render ----------
   return (
     <>
       <Head>
@@ -564,12 +630,11 @@ export default function Projects() {
       </Head>
 
       <div className="min-h-screen bg-slate-50">
-        {/* Header */}
         <header className="bg-white border-b border-slate-200 sticky top-0 z-30">
           <nav className="max-w-6xl mx-auto px-6 py-4 flex justify-between items-center">
             <div className="flex items-center gap-3">
               <div className="w-10 h-10 bg-gradient-to-br from-blue-600 to-blue-700 rounded-lg flex items-center justify-center shadow-sm">
-                <span className="text-white font-bold text-lg">⏱</span>
+                <Clock className="w-5 h-5 text-white" strokeWidth={2.5} />
               </div>
               <span className="font-bold text-xl text-slate-900">Valopo</span>
             </div>
@@ -592,7 +657,7 @@ export default function Projects() {
               >
                 Mis clientes
               </Link>
-                  <Link
+              <Link
                 href="/invoices"
                 className="px-3 sm:px-4 py-2 text-sm text-slate-600 hover:bg-slate-100 rounded-lg transition font-medium"
               >
@@ -631,9 +696,7 @@ export default function Projects() {
             </div>
           ) : (
             <>
-              {/* Mode + Selector + Actions */}
               <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-6 mb-6">
-                {/* Mode tabs */}
                 <div className="flex gap-2 mb-5 border-b border-slate-100">
                   <button
                     onClick={() => setMode('project')}
@@ -698,26 +761,29 @@ export default function Projects() {
                   <button
                     onClick={exportCSV}
                     disabled={!analysisTitle || analysisSessions.length === 0}
-                    className="px-5 py-3 bg-slate-100 text-slate-700 rounded-lg font-semibold hover:bg-slate-200 transition disabled:opacity-50 disabled:cursor-not-allowed whitespace-nowrap"
+                    className="px-5 py-3 bg-slate-100 text-slate-700 rounded-lg font-semibold hover:bg-slate-200 transition disabled:opacity-50 disabled:cursor-not-allowed whitespace-nowrap inline-flex items-center gap-2"
                   >
-                    ↓ Exportar CSV
+                    <Download className="w-4 h-4" strokeWidth={2.5} />
+                    Exportar CSV
                   </button>
                   <button
                     onClick={exportPDF}
                     disabled={!analysisTitle || analysisSessions.length === 0 || exporting}
-                    className="px-5 py-3 bg-blue-600 text-white rounded-lg font-semibold hover:bg-blue-700 transition disabled:opacity-50 disabled:cursor-not-allowed whitespace-nowrap relative"
+                    className="px-5 py-3 bg-blue-600 text-white rounded-lg font-semibold hover:bg-blue-700 transition disabled:opacity-50 disabled:cursor-not-allowed whitespace-nowrap inline-flex items-center gap-2"
                   >
-                    {exporting ? 'Generando…' : (
+                    {exporting ? (
+                      'Generando…'
+                    ) : (
                       <>
-                        {!isPro && <span className="mr-1">🔒</span>}
-                        ↓ Exportar PDF
+                        {!isPro && <Lock className="w-3.5 h-3.5" strokeWidth={2.5} />}
+                        <Download className="w-4 h-4" strokeWidth={2.5} />
+                        Exportar PDF
                       </>
                     )}
                   </button>
                 </div>
               </div>
 
-              {/* Client info card (when applicable) */}
               {(projectClient || selectedClient) && (
                 <div className="bg-gradient-to-br from-blue-50 to-white border border-blue-200 rounded-2xl p-5 mb-6">
                   <div className="flex items-start justify-between gap-4 flex-wrap">
@@ -735,10 +801,16 @@ export default function Projects() {
                           </span>
                         )}
                         {(projectClient || selectedClient).email && (
-                          <span>✉ {(projectClient || selectedClient).email}</span>
+                          <span className="inline-flex items-center gap-1">
+                            <Mail className="w-3.5 h-3.5" strokeWidth={2.25} />
+                            {(projectClient || selectedClient).email}
+                          </span>
                         )}
                         {(projectClient || selectedClient).city && (
-                          <span>📍 {(projectClient || selectedClient).city}</span>
+                          <span className="inline-flex items-center gap-1">
+                            <MapPin className="w-3.5 h-3.5" strokeWidth={2.25} />
+                            {(projectClient || selectedClient).city}
+                          </span>
                         )}
                       </div>
                     </div>
@@ -769,9 +841,56 @@ export default function Projects() {
                 </div>
               )}
 
+              {/* PROFITABILITY INSIGHT (Nivel 1.5) */}
+              {analysisTitle && (
+                profitability ? (
+                  <div className={`${profitability.bgClass} ${profitability.borderClass} border rounded-2xl p-5 mb-6`}>
+                    <div className="flex items-start gap-4">
+                      <profitability.Icon
+                        className={`w-7 h-7 ${profitability.iconColor} flex-shrink-0 mt-0.5`}
+                        strokeWidth={2.25}
+                      />
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-baseline gap-3 flex-wrap">
+                          <h3 className={`text-lg font-bold ${profitability.textClass}`}>
+                            {profitability.label}
+                          </h3>
+                          <span className={`text-xs font-semibold ${profitability.iconColor}`}>
+                            {profitability.deltaPct >= 0 ? '+' : ''}
+                            {profitability.deltaPct.toFixed(0)}% vs objetivo
+                          </span>
+                        </div>
+                        <p className={`text-sm ${profitability.textClass} mt-1 opacity-90`}>
+                          {profitability.description}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="bg-white border border-dashed border-slate-300 rounded-2xl p-5 mb-6 flex items-center justify-between gap-4 flex-wrap">
+                    <div className="flex items-start gap-3">
+                      <Target className="w-6 h-6 text-blue-600 flex-shrink-0 mt-0.5" strokeWidth={2.25} />
+                      <div>
+                        <p className="text-sm font-semibold text-slate-900">
+                          Define tu objetivo €/hora
+                        </p>
+                        <p className="text-xs text-slate-500 mt-0.5">
+                          Configúralo en Mi cuenta para ver si este {mode === 'project' ? 'proyecto' : 'cliente'} es rentable según tus criterios.
+                        </p>
+                      </div>
+                    </div>
+                    <Link
+                      href="/account"
+                      className="text-xs font-bold text-blue-600 hover:underline whitespace-nowrap"
+                    >
+                      Configurar objetivo →
+                    </Link>
+                  </div>
+                )
+              )}
+
               {analysisTitle && (
                 <>
-                  {/* Stats */}
                   <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-6">
                     <StatCard label="Horas totales" value={formatHours(stats.totalHours)} />
                     <StatCard
@@ -924,7 +1043,6 @@ export default function Projects() {
                         </ResponsiveContainer>
                       </ChartCard>
 
-                      {/* Sessions table */}
                       <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
                         <div className="p-6 border-b border-slate-100">
                           <h2 className="text-xl font-bold text-slate-900">
@@ -1001,7 +1119,6 @@ export default function Projects() {
           )}
         </main>
 
-        {/* Toast */}
         {toast && (
           <div
             className={`fixed bottom-6 right-6 z-50 px-5 py-3 rounded-lg shadow-lg font-semibold text-sm ${
@@ -1012,7 +1129,6 @@ export default function Projects() {
           </div>
         )}
 
-        {/* Upgrade modal */}
         {showUpgradeModal && (
           <div
             className="fixed inset-0 z-50 bg-slate-900/50 backdrop-blur-sm flex items-center justify-center p-4"
@@ -1024,7 +1140,7 @@ export default function Projects() {
             >
               <div className="text-center mb-6">
                 <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-br from-blue-600 to-blue-700 rounded-full mb-4">
-                  <span className="text-3xl">📄</span>
+                  <FileText className="w-7 h-7 text-white" strokeWidth={2.25} />
                 </div>
                 <h3 className="font-bold text-2xl text-slate-900 mb-2">
                   Exportar PDF es Pro
@@ -1036,15 +1152,15 @@ export default function Projects() {
 
               <ul className="space-y-2 mb-6 text-sm">
                 <li className="flex items-center gap-2 text-slate-700">
-                  <span className="text-emerald-600 font-bold">✓</span>
+                  <Check className="w-4 h-4 text-emerald-600" strokeWidth={3} />
                   PDF profesional con gráficos
                 </li>
                 <li className="flex items-center gap-2 text-slate-700">
-                  <span className="text-emerald-600 font-bold">✓</span>
+                  <Check className="w-4 h-4 text-emerald-600" strokeWidth={3} />
                   Proyectos ilimitados
                 </li>
                 <li className="flex items-center gap-2 text-slate-700">
-                  <span className="text-emerald-600 font-bold">✓</span>
+                  <Check className="w-4 h-4 text-emerald-600" strokeWidth={3} />
                   Histórico completo
                 </li>
               </ul>
@@ -1090,7 +1206,6 @@ export default function Projects() {
   );
 }
 
-// ---------- Subcomponents ----------
 function StatCard({ label, value, accent, small }) {
   const valueColor =
     accent === 'emerald' ? 'text-emerald-600' : 'text-slate-900';
