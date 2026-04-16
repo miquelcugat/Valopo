@@ -93,7 +93,7 @@ export default function Home() {
             </div>
 
             <p className="text-sm text-slate-500">
-              Sin tarjeta de crédito. 2 proyectos gratis. Acceso inmediato.
+              Plan Free sin compromiso. 2 proyectos gratis. Acceso inmediato.
             </p>
           </div>
         </section>
@@ -349,7 +349,7 @@ export default function Home() {
               <span className="text-blue-400">Asegúrate de que sea justo.</span>
             </h2>
             <p className="text-slate-400 mb-8 text-lg">
-              Empieza gratis. Sin tarjeta. Configura tu objetivo y empieza a
+              Empieza gratis con 2 proyectos. Configura tu objetivo y empieza a
               entender cuánto vale tu trabajo.
             </p>
             <button
