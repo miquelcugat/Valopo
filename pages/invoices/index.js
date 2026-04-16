@@ -4,6 +4,8 @@ import Head from 'next/head';
 import Link from 'next/link';
 import { supabase } from '../../lib/supabaseClient';
 import { usePlan } from '../../lib/usePlan';
+import MobileNav from '../../components/MobileNav';
+import { Clock } from 'lucide-react';
 
 const STATUS_LABELS = {
   draft: { label: 'Borrador', color: 'bg-slate-100 text-slate-700' },
@@ -423,11 +425,11 @@ export default function InvoicesIndex() {
     return (
       <>
         <Head>
-          <title>Mis facturas · Timely</title>
+          <title>Mis facturas · Valopo</title>
         </Head>
         <div className="min-h-screen bg-slate-50">
           <Header isPro={isPro} active="invoices" />
-          <main className="max-w-6xl mx-auto px-6 py-10 relative">
+          <main className="max-w-6xl mx-auto px-6 py-10 pb-24 md:pb-10 relative">
             <div className="filter blur-sm pointer-events-none select-none">
               <h1 className="text-3xl font-bold text-slate-900 mb-8">Mis facturas</h1>
               <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6">
@@ -521,13 +523,13 @@ export default function InvoicesIndex() {
   return (
     <>
       <Head>
-        <title>Mis facturas · Timely</title>
+        <title>Mis facturas · Valopo</title>
       </Head>
 
       <div className="min-h-screen bg-slate-50">
         <Header isPro={isPro} active="invoices" />
 
-        <main className="max-w-6xl mx-auto px-6 py-8 sm:py-10">
+        <main className="max-w-6xl mx-auto px-6 py-8 sm:py-10 pb-24 md:pb-10">
           {/* Page header */}
           <div className="flex flex-wrap justify-between items-start gap-4 mb-8">
             <div>
@@ -674,13 +676,15 @@ export default function InvoicesIndex() {
         {/* Toast */}
         {toast && (
           <div
-            className={`fixed bottom-6 right-6 z-50 px-5 py-3 rounded-lg shadow-lg font-semibold text-sm ${
+            className={`fixed bottom-20 md:bottom-6 right-6 z-50 px-5 py-3 rounded-lg shadow-lg font-semibold text-sm ${
               toast.type === 'success' ? 'bg-emerald-600 text-white' : 'bg-red-600 text-white'
             }`}
           >
             {toast.msg}
           </div>
         )}
+
+        <MobileNav />
 
         {/* Wizard modal */}
         {showWizard && (
@@ -1113,10 +1117,10 @@ function Header({ isPro, active }) {
       <nav className="max-w-6xl mx-auto px-6 py-4 flex justify-between items-center">
         <Link href="/dashboard" className="flex items-center gap-3">
           <div className="w-10 h-10 bg-gradient-to-br from-blue-600 to-blue-700 rounded-lg flex items-center justify-center shadow-sm">
-            <span className="text-white font-bold text-lg">⏱</span>
+            <Clock className="w-5 h-5 text-white" strokeWidth={2.5} />
           </div>
           <div className="flex items-center gap-2">
-            <span className="font-bold text-xl text-slate-900">Timely</span>
+            <span className="font-bold text-xl text-slate-900">Valopo</span>
             <span
               className={`text-xs font-bold px-2 py-0.5 rounded-full ${
                 isPro ? 'bg-blue-100 text-blue-700' : 'bg-slate-100 text-slate-600'
@@ -1126,7 +1130,7 @@ function Header({ isPro, active }) {
             </span>
           </div>
         </Link>
-        <div className="flex items-center gap-2 sm:gap-4">
+        <div className="hidden md:flex items-center gap-2 sm:gap-4">
           <Link
             href="/dashboard"
             className="px-3 sm:px-4 py-2 text-sm text-slate-600 hover:bg-slate-100 rounded-lg transition font-medium"
@@ -1156,6 +1160,15 @@ function Header({ isPro, active }) {
             Facturas
           </Link>
         </div>
+        <button
+          onClick={async () => {
+            await supabase.auth.signOut();
+            router.push('/');
+          }}
+          className="md:hidden px-3 py-2 text-sm text-slate-600 hover:bg-slate-100 rounded-lg transition font-medium"
+        >
+          Salir
+        </button>
       </nav>
     </header>
   );
