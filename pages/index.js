@@ -1,6 +1,18 @@
 import Head from 'next/head';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
+import {
+  Clock,
+  Target,
+  TrendingUp,
+  BarChart3,
+  FileText,
+  Shield,
+  Zap,
+  ChevronRight,
+  Check,
+  Smartphone,
+} from 'lucide-react';
 
 export default function Home() {
   const router = useRouter();
@@ -8,211 +20,413 @@ export default function Home() {
   return (
     <>
       <Head>
-        <title>Valopo - Sabes cuánto ganas por hora</title>
-        <meta name="description" content="Track tus horas, calcula tus ingresos reales. Para freelancers que quieren saber de verdad cuánto ganan." />
+        <title>Valopo — Descubre cuánto vale realmente tu tiempo</title>
+        <meta
+          name="description"
+          content="Define tu objetivo, registra tu trabajo, y Valopo te dice si estás ganando lo que mereces. Para freelancers que quieren cobrar lo que valen."
+        />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
       </Head>
 
-      <div className="min-h-screen bg-gradient-to-b from-blue-50 via-white to-gray-50">
+      <div className="min-h-screen bg-white">
         {/* Header */}
-        <header className="sticky top-0 z-50 bg-white/80 backdrop-blur-md border-b border-gray-100">
-          <nav className="max-w-6xl mx-auto px-6 py-4 flex justify-between items-center">
+        <header className="sticky top-0 z-50 bg-white/90 backdrop-blur-md border-b border-slate-100">
+          <nav className="max-w-5xl mx-auto px-6 py-4 flex justify-between items-center">
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 bg-gradient-to-br from-blue-600 to-blue-700 rounded-xl flex items-center justify-center shadow-lg">
-                <span className="text-white font-bold text-xl">⏱</span>
+              <div className="w-10 h-10 bg-gradient-to-br from-blue-600 to-blue-700 rounded-lg flex items-center justify-center shadow-sm">
+                <Clock className="w-5 h-5 text-white" strokeWidth={2.5} />
               </div>
-              <span className="font-bold text-2xl bg-gradient-to-r from-blue-600 to-blue-800 bg-clip-text text-transparent">Valopo</span>
+              <span className="font-bold text-xl text-slate-900">Valopo</span>
             </div>
-            <button
-              onClick={() => router.push('/login')}
-              className="px-6 py-2 bg-blue-600 text-white rounded-lg font-semibold hover:bg-blue-700 hover:shadow-lg transition-all"
-            >
-              Entra
-            </button>
-          </nav>
-        </header>
-
-        {/* Hero Section */}
-        <section className="max-w-6xl mx-auto px-6 py-24">
-          <div className="text-center mb-16">
-            <div className="inline-block mb-6 px-4 py-2 bg-blue-100 text-blue-700 rounded-full text-sm font-semibold">
-              🚀 Para freelancers ambiciosos
-            </div>
-            
-            <h1 className="text-6xl md:text-7xl font-black text-gray-900 mb-6 leading-tight">
-              Sabes cuánto ganas<br />
-              <span className="bg-gradient-to-r from-blue-600 to-cyan-500 bg-clip-text text-transparent">de verdad</span>
-            </h1>
-            
-            <p className="text-xl text-gray-600 mb-10 max-w-2xl mx-auto leading-relaxed">
-              La mayoría de freelancers terminan el mes sin saber si ganaron €800 o €2000. 
-              <strong> Valopo te muestra en tiempo real cuánto dinero estás haciendo.</strong>
-            </p>
-
-            <div className="flex gap-4 justify-center mb-8">
-              <button
-                onClick={() => router.push('/pricing')}
-                className="px-8 py-4 bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-lg font-bold text-lg hover:shadow-xl hover:from-blue-700 hover:to-blue-800 transition-all transform hover:scale-105"
-              >
-                🎯 Prueba gratis ahora
-              </button>
+            <div className="flex items-center gap-3">
               <button
                 onClick={() => router.push('/login')}
-                className="px-8 py-4 border-2 border-blue-600 text-blue-600 rounded-lg font-bold text-lg hover:bg-blue-50 transition-all"
+                className="px-4 py-2 text-sm text-slate-600 hover:text-slate-900 font-medium transition"
               >
                 Entrar
               </button>
+              <button
+                onClick={() => router.push('/login')}
+                className="px-5 py-2 bg-blue-600 text-white rounded-lg font-semibold text-sm hover:bg-blue-700 transition shadow-sm"
+              >
+                Empieza gratis
+              </button>
             </div>
+          </nav>
+        </header>
 
-            <p className="text-sm text-gray-500">✨ Sin tarjeta de crédito • Acceso inmediato • Cancelable en cualquier momento</p>
-          </div>
-
-          {/* Stats */}
-          <div className="grid md:grid-cols-3 gap-8 mb-20">
-            <div className="text-center p-8 bg-white rounded-2xl shadow-sm hover:shadow-md transition-all">
-              <div className="text-4xl mb-3">👥</div>
-              <p className="text-gray-500 text-sm">Freelancers activos</p>
-              <p className="text-3xl font-bold text-gray-900">1,200+</p>
-            </div>
-            <div className="text-center p-8 bg-white rounded-2xl shadow-sm hover:shadow-md transition-all">
-              <div className="text-4xl mb-3">⏱</div>
-              <p className="text-gray-500 text-sm">Horas registradas</p>
-              <p className="text-3xl font-bold text-gray-900">45K+</p>
-            </div>
-            <div className="text-center p-8 bg-white rounded-2xl shadow-sm hover:shadow-md transition-all">
-              <div className="text-4xl mb-3">💰</div>
-              <p className="text-gray-500 text-sm">Ingresos tracked</p>
-              <p className="text-3xl font-bold text-gray-900">€2.5M+</p>
-            </div>
-          </div>
-
-          {/* Feature Cards */}
-          <div className="mb-20">
-            <h2 className="text-4xl font-bold text-center text-gray-900 mb-12">¿Por qué Valopo?</h2>
-            <div className="grid md:grid-cols-3 gap-8">
-              <div className="p-8 bg-white rounded-2xl shadow-sm hover:shadow-lg hover:-translate-y-1 transition-all">
-                <div className="text-5xl mb-4">⏰</div>
-                <h3 className="font-bold text-xl text-gray-900 mb-3">Timer Real en Vivo</h3>
-                <p className="text-gray-600">Clickea &quot;empezar&quot; y cada segundo cuenta. Sin complicaciones.</p>
-              </div>
-
-              <div className="p-8 bg-white rounded-2xl shadow-sm hover:shadow-lg hover:-translate-y-1 transition-all">
-                <div className="text-5xl mb-4">💵</div>
-                <h3 className="font-bold text-xl text-gray-900 mb-3">Visualiza tus ingresos</h3>
-                <p className="text-gray-600">Dashboard claro: horas × tarifa = dinero ganado. Números reales.</p>
-              </div>
-
-              <div className="p-8 bg-white rounded-2xl shadow-sm hover:shadow-lg hover:-translate-y-1 transition-all">
-                <div className="text-5xl mb-4">📊</div>
-                <h3 className="font-bold text-xl text-gray-900 mb-3">Análisis Profundo</h3>
-                <p className="text-gray-600">Ve qué proyectos pagan mejor. Ajusta tus precios con datos.</p>
-              </div>
-
-              <div className="p-8 bg-white rounded-2xl shadow-sm hover:shadow-lg hover:-translate-y-1 transition-all">
-                <div className="text-5xl mb-4">📱</div>
-                <h3 className="font-bold text-xl text-gray-900 mb-3">Acceso desde cualquier lugar</h3>
-                <p className="text-gray-600">Web, mobile, desktop. Tu timer siempre en tu bolsillo.</p>
-              </div>
-
-              <div className="p-8 bg-white rounded-2xl shadow-sm hover:shadow-lg hover:-translate-y-1 transition-all">
-                <div className="text-5xl mb-4">🔒</div>
-                <h3 className="font-bold text-xl text-gray-900 mb-3">Privado y Seguro</h3>
-                <p className="text-gray-600">Tus datos son solo tuyos. Encriptado. Sin publicidad.</p>
-              </div>
-
-              <div className="p-8 bg-white rounded-2xl shadow-sm hover:shadow-lg hover:-translate-y-1 transition-all">
-                <div className="text-5xl mb-4">🚀</div>
-                <h3 className="font-bold text-xl text-gray-900 mb-3">Crece sin límites</h3>
-                <p className="text-gray-600">Hasta 2 proyectos gratis. Pro: proyectos ilimitados.</p>
-              </div>
-            </div>
-          </div>
-
-          {/* Testimonial */}
-          <div className="mb-20">
-            <h2 className="text-4xl font-bold text-center text-gray-900 mb-12">Lo que dicen nuestros usuarios</h2>
-            <div className="bg-gradient-to-br from-blue-600 to-blue-700 rounded-2xl p-12 text-white text-center shadow-xl">
-              <div className="text-5xl mb-6">⭐⭐⭐⭐⭐</div>
-              <p className="text-xl mb-6 leading-relaxed">
-                &quot;Usé Valopo una semana y descubrí que estaba cobrando €18/h cuando podría cobrar €40. 
-                <strong> Subí precios y ahora gano €600 más al mes. Increíble.&quot;</strong>
-              </p>
-              <p className="text-blue-100">— Freelancer, Madrid (Diseño UX)</p>
-            </div>
-          </div>
-
-          {/* CTA Section */}
-          <div className="bg-gradient-to-r from-blue-600 via-blue-600 to-cyan-600 rounded-3xl p-16 text-white text-center shadow-2xl">
-            <h2 className="text-5xl font-black mb-6">¿Listo para saber cuánto ganas?</h2>
-            <p className="text-xl mb-10 text-blue-100 max-w-2xl mx-auto">
-              Empieza gratis. 2 proyectos. Sin tarjeta. Acceso instantáneo.
+        {/* Hero */}
+        <section className="max-w-5xl mx-auto px-6 pt-20 pb-24">
+          <div className="text-center max-w-3xl mx-auto">
+            <p className="inline-flex items-center gap-2 text-sm font-semibold text-blue-700 bg-blue-50 px-4 py-1.5 rounded-full mb-8">
+              <Target className="w-4 h-4" strokeWidth={2.5} />
+              Para freelancers que quieren cobrar lo que valen
             </p>
-            <button
-              onClick={() => router.push('/pricing')}
-              className="px-10 py-5 bg-white text-blue-600 rounded-lg font-bold text-lg hover:bg-blue-50 shadow-lg hover:shadow-xl transition-all transform hover:scale-105 inline-block"
-            >
-              🎉 Crea tu cuenta ahora (gratis)
-            </button>
-          </div>
 
-          {/* FAQ Section */}
-          <div className="mt-20 mb-20">
-            <h2 className="text-4xl font-bold text-center text-gray-900 mb-12">Preguntas frecuentes</h2>
-            <div className="space-y-6 max-w-2xl mx-auto">
-              <div className="p-6 bg-white rounded-xl border border-gray-200 hover:border-blue-300 transition-all">
-                <h3 className="font-bold text-lg text-gray-900 mb-2">¿Es realmente gratis?</h3>
-                <p className="text-gray-600">Sí. Versión Free con 2 proyectos. Pro es €14.99/mes si necesitas más.</p>
+            <h1 className="text-5xl sm:text-6xl font-black text-slate-900 leading-[1.1] mb-6 tracking-tight">
+              Descubre cuánto vale
+              <br />
+              <span className="text-blue-600">realmente tu tiempo</span>
+            </h1>
+
+            <p className="text-lg text-slate-600 mb-10 max-w-2xl mx-auto leading-relaxed">
+              Define tu objetivo. Registra tu trabajo. Valopo te dice si estás
+              ganando lo que mereces, proyecto a proyecto.
+            </p>
+
+            <div className="flex flex-col sm:flex-row gap-3 justify-center mb-6">
+              <button
+                onClick={() => router.push('/login')}
+                className="px-8 py-4 bg-blue-600 text-white rounded-lg font-bold text-lg hover:bg-blue-700 transition shadow-sm inline-flex items-center justify-center gap-2"
+              >
+                Empieza gratis
+                <ChevronRight className="w-5 h-5" strokeWidth={2.5} />
+              </button>
+              <button
+                onClick={() => {
+                  document.getElementById('como-funciona')?.scrollIntoView({ behavior: 'smooth' });
+                }}
+                className="px-8 py-4 border border-slate-200 text-slate-700 rounded-lg font-semibold text-lg hover:bg-slate-50 transition"
+              >
+                Cómo funciona
+              </button>
+            </div>
+
+            <p className="text-sm text-slate-500">
+              Sin tarjeta de crédito. 2 proyectos gratis. Acceso inmediato.
+            </p>
+          </div>
+        </section>
+
+        {/* How it works */}
+        <section id="como-funciona" className="bg-slate-50 py-24">
+          <div className="max-w-5xl mx-auto px-6">
+            <div className="text-center mb-16">
+              <h2 className="text-3xl sm:text-4xl font-bold text-slate-900 mb-4">
+                Tres pasos para saber lo que vales
+              </h2>
+              <p className="text-lg text-slate-500 max-w-2xl mx-auto">
+                Valopo no es solo un cronómetro. Es tu herramienta para tomar
+                mejores decisiones sobre tu trabajo.
+              </p>
+            </div>
+
+            <div className="grid md:grid-cols-3 gap-8">
+              <div className="bg-white rounded-2xl p-8 border border-slate-200 shadow-sm">
+                <div className="w-12 h-12 bg-blue-50 rounded-xl flex items-center justify-center mb-5">
+                  <Target className="w-6 h-6 text-blue-600" strokeWidth={2.25} />
+                </div>
+                <div className="text-xs font-bold text-blue-600 uppercase tracking-wide mb-2">
+                  Paso 1
+                </div>
+                <h3 className="font-bold text-xl text-slate-900 mb-3">
+                  Define tu objetivo
+                </h3>
+                <p className="text-slate-600 leading-relaxed">
+                  Configura cuánto quieres ganar por hora y por mes.
+                  Valopo necesita saber tu meta para decirte si la estás cumpliendo.
+                </p>
               </div>
-              <div className="p-6 bg-white rounded-xl border border-gray-200 hover:border-blue-300 transition-all">
-                <h3 className="font-bold text-lg text-gray-900 mb-2">¿Puedo cambiar de plan?</h3>
-                <p className="text-gray-600">Claro. Cancela o upgrade en cualquier momento. Sin sorpresas.</p>
+
+              <div className="bg-white rounded-2xl p-8 border border-slate-200 shadow-sm">
+                <div className="w-12 h-12 bg-blue-50 rounded-xl flex items-center justify-center mb-5">
+                  <Clock className="w-6 h-6 text-blue-600" strokeWidth={2.25} />
+                </div>
+                <div className="text-xs font-bold text-blue-600 uppercase tracking-wide mb-2">
+                  Paso 2
+                </div>
+                <h3 className="font-bold text-xl text-slate-900 mb-3">
+                  Registra tu trabajo
+                </h3>
+                <p className="text-slate-600 leading-relaxed">
+                  Dale al play, trabaja, y para el cronómetro.
+                  Valopo calcula automáticamente cuánto has ganado en cada sesión.
+                </p>
               </div>
-              <div className="p-6 bg-white rounded-xl border border-gray-200 hover:border-blue-300 transition-all">
-                <h3 className="font-bold text-lg text-gray-900 mb-2">¿Mis datos son privados?</h3>
-                <p className="text-gray-600">100%. Encriptados. Nunca vendemos datos. Nunca publicidad.</p>
+
+              <div className="bg-white rounded-2xl p-8 border border-slate-200 shadow-sm">
+                <div className="w-12 h-12 bg-blue-50 rounded-xl flex items-center justify-center mb-5">
+                  <TrendingUp className="w-6 h-6 text-blue-600" strokeWidth={2.25} />
+                </div>
+                <div className="text-xs font-bold text-blue-600 uppercase tracking-wide mb-2">
+                  Paso 3
+                </div>
+                <h3 className="font-bold text-xl text-slate-900 mb-3">
+                  Descubre tu rentabilidad
+                </h3>
+                <p className="text-slate-600 leading-relaxed">
+                  Valopo te muestra qué proyectos son rentables, cuáles no, y
+                  si vas en el ritmo correcto para alcanzar tu objetivo del mes.
+                </p>
               </div>
             </div>
           </div>
         </section>
 
+        {/* Features */}
+        <section className="py-24">
+          <div className="max-w-5xl mx-auto px-6">
+            <div className="text-center mb-16">
+              <h2 className="text-3xl sm:text-4xl font-bold text-slate-900 mb-4">
+                Todo lo que necesitas, nada que sobre
+              </h2>
+              <p className="text-lg text-slate-500 max-w-2xl mx-auto">
+                Diseñado para freelancers que quieren una herramienta profesional
+                sin la complejidad de un ERP.
+              </p>
+            </div>
+
+            <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
+              {[
+                {
+                  Icon: Clock,
+                  title: 'Cronómetro en vivo',
+                  desc: 'Un click para empezar, otro para parar. Sin complicaciones.',
+                },
+                {
+                  Icon: TrendingUp,
+                  title: 'Insights de rentabilidad',
+                  desc: 'Sabes al instante si un proyecto te compensa o te está costando dinero.',
+                },
+                {
+                  Icon: BarChart3,
+                  title: 'Análisis por proyecto',
+                  desc: 'Gráficos de horas diarias, ingresos semanales y distribución horaria.',
+                },
+                {
+                  Icon: FileText,
+                  title: 'Facturas profesionales',
+                  desc: 'Genera facturas con tus datos fiscales, logo, y líneas de detalle.',
+                },
+                {
+                  Icon: Smartphone,
+                  title: 'Desde cualquier lugar',
+                  desc: 'Web responsive. Funciona en móvil, tablet y escritorio.',
+                },
+                {
+                  Icon: Shield,
+                  title: 'Privado y seguro',
+                  desc: 'Tus datos son tuyos. Sin publicidad. Sin venta de datos.',
+                },
+              ].map(({ Icon, title, desc }) => (
+                <div
+                  key={title}
+                  className="p-6 rounded-2xl border border-slate-200 hover:border-blue-200 hover:shadow-sm transition group"
+                >
+                  <Icon
+                    className="w-6 h-6 text-blue-600 mb-4 group-hover:scale-110 transition-transform"
+                    strokeWidth={2.25}
+                  />
+                  <h3 className="font-bold text-slate-900 mb-2">{title}</h3>
+                  <p className="text-sm text-slate-600 leading-relaxed">{desc}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        {/* Pricing */}
+        <section className="bg-slate-50 py-24">
+          <div className="max-w-5xl mx-auto px-6">
+            <div className="text-center mb-16">
+              <h2 className="text-3xl sm:text-4xl font-bold text-slate-900 mb-4">
+                Planes simples, sin sorpresas
+              </h2>
+              <p className="text-lg text-slate-500">
+                Empieza gratis. Sube a Pro cuando quieras.
+              </p>
+            </div>
+
+            <div className="grid md:grid-cols-2 gap-6 max-w-3xl mx-auto">
+              {/* Free */}
+              <div className="bg-white rounded-2xl border border-slate-200 p-8">
+                <h3 className="font-bold text-xl text-slate-900 mb-1">Free</h3>
+                <p className="text-sm text-slate-500 mb-6">Para empezar y probar</p>
+                <p className="text-4xl font-bold text-slate-900 mb-6">
+                  0 €<span className="text-base font-normal text-slate-500">/mes</span>
+                </p>
+                <ul className="space-y-3 mb-8">
+                  {[
+                    'Hasta 2 proyectos',
+                    'Cronómetro en vivo',
+                    'Dashboard con stats',
+                    'Historial de 30 días',
+                    'Exportar CSV',
+                  ].map((f) => (
+                    <li key={f} className="flex items-center gap-2 text-sm text-slate-700">
+                      <Check className="w-4 h-4 text-emerald-600 flex-shrink-0" strokeWidth={3} />
+                      {f}
+                    </li>
+                  ))}
+                </ul>
+                <button
+                  onClick={() => router.push('/login')}
+                  className="w-full px-6 py-3 border border-slate-200 text-slate-700 rounded-lg font-semibold hover:bg-slate-50 transition"
+                >
+                  Empieza gratis
+                </button>
+              </div>
+
+              {/* Pro */}
+              <div className="bg-white rounded-2xl border-2 border-blue-600 p-8 relative shadow-sm">
+                <div className="absolute -top-3 left-6 bg-blue-600 text-white text-xs font-bold px-3 py-1 rounded-full">
+                  Recomendado
+                </div>
+                <h3 className="font-bold text-xl text-slate-900 mb-1">Pro</h3>
+                <p className="text-sm text-slate-500 mb-6">Para freelancers serios</p>
+                <p className="text-4xl font-bold text-slate-900 mb-6">
+                  14,99 €<span className="text-base font-normal text-slate-500">/mes</span>
+                </p>
+                <ul className="space-y-3 mb-8">
+                  {[
+                    'Proyectos ilimitados',
+                    'Todo lo de Free',
+                    'Historial completo',
+                    'Exportar PDF con gráficos',
+                    'Facturas profesionales con logo',
+                    'Insights de rentabilidad',
+                  ].map((f) => (
+                    <li key={f} className="flex items-center gap-2 text-sm text-slate-700">
+                      <Check className="w-4 h-4 text-blue-600 flex-shrink-0" strokeWidth={3} />
+                      {f}
+                    </li>
+                  ))}
+                </ul>
+                <button
+                  onClick={() => router.push('/login')}
+                  className="w-full px-6 py-3 bg-blue-600 text-white rounded-lg font-bold hover:bg-blue-700 transition"
+                >
+                  Empieza con Pro
+                </button>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* FAQ */}
+        <section className="py-24">
+          <div className="max-w-2xl mx-auto px-6">
+            <h2 className="text-3xl font-bold text-center text-slate-900 mb-12">
+              Preguntas frecuentes
+            </h2>
+            <div className="space-y-4">
+              {[
+                {
+                  q: '¿Es realmente gratis?',
+                  a: 'Sí. La versión Free incluye hasta 2 proyectos, cronómetro, dashboard y exportación CSV. Sin límite de tiempo.',
+                },
+                {
+                  q: '¿Puedo cambiar de plan cuando quiera?',
+                  a: 'Por supuesto. Puedes subir a Pro o cancelar en cualquier momento desde tu cuenta. Sin permanencia ni penalizaciones.',
+                },
+                {
+                  q: '¿Mis datos son privados?',
+                  a: 'Tus datos están encriptados y nunca se comparten con terceros. Sin publicidad, sin venta de datos.',
+                },
+                {
+                  q: '¿Necesito instalar algo?',
+                  a: 'No. Valopo funciona 100% en el navegador. Solo necesitas una conexión a internet.',
+                },
+              ].map(({ q, a }) => (
+                <div
+                  key={q}
+                  className="p-5 bg-white rounded-xl border border-slate-200"
+                >
+                  <h3 className="font-semibold text-slate-900 mb-2">{q}</h3>
+                  <p className="text-sm text-slate-600 leading-relaxed">{a}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        {/* Final CTA */}
+        <section className="bg-slate-900 py-20">
+          <div className="max-w-3xl mx-auto px-6 text-center">
+            <h2 className="text-3xl sm:text-4xl font-bold text-white mb-4">
+              Tu tiempo tiene un precio.
+              <br />
+              <span className="text-blue-400">Asegúrate de que sea justo.</span>
+            </h2>
+            <p className="text-slate-400 mb-8 text-lg">
+              Empieza gratis. Sin tarjeta. Configura tu objetivo y empieza a
+              entender cuánto vale tu trabajo.
+            </p>
+            <button
+              onClick={() => router.push('/login')}
+              className="px-8 py-4 bg-blue-600 text-white rounded-lg font-bold text-lg hover:bg-blue-500 transition shadow-lg inline-flex items-center gap-2"
+            >
+              Crear cuenta gratis
+              <ChevronRight className="w-5 h-5" strokeWidth={2.5} />
+            </button>
+          </div>
+        </section>
+
         {/* Footer */}
-        <footer className="bg-gray-900 text-gray-400 py-12 border-t border-gray-800">
-          <div className="max-w-6xl mx-auto px-6">
+        <footer className="bg-slate-900 border-t border-slate-800 py-12">
+          <div className="max-w-5xl mx-auto px-6">
             <div className="grid md:grid-cols-4 gap-8 mb-8">
               <div>
                 <div className="flex items-center gap-2 mb-4">
                   <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center">
-                    <span className="text-white font-bold">⏱</span>
+                    <Clock className="w-4 h-4 text-white" strokeWidth={2.5} />
                   </div>
                   <span className="font-bold text-white">Valopo</span>
                 </div>
-                <p className="text-sm">Para freelancers que quieren saber cuánto ganan.</p>
+                <p className="text-sm text-slate-500">
+                  Para freelancers que quieren saber cuánto vale su tiempo.
+                </p>
               </div>
               <div>
-                <h4 className="font-bold text-white mb-3">Producto</h4>
-                <ul className="space-y-2 text-sm">
-                  <li><button onClick={() => router.push('/pricing')} className="hover:text-white transition">Planes</button></li>
-                  <li><button onClick={() => router.push('/')} className="hover:text-white transition">Features</button></li>
+                <h4 className="font-semibold text-white mb-3 text-sm">Producto</h4>
+                <ul className="space-y-2 text-sm text-slate-500">
+                  <li>
+                    <button onClick={() => router.push('/login')} className="hover:text-white transition">
+                      Empieza gratis
+                    </button>
+                  </li>
+                  <li>
+                    <button onClick={() => router.push('/login')} className="hover:text-white transition">
+                      Entrar
+                    </button>
+                  </li>
                 </ul>
               </div>
               <div>
-                <h4 className="font-bold text-white mb-3">Empresa</h4>
-                <ul className="space-y-2 text-sm">
-                  <li><a href="#" className="hover:text-white transition">Blog</a></li>
-                  <li><a href="#" className="hover:text-white transition">Contacto</a></li>
+                <h4 className="font-semibold text-white mb-3 text-sm">Legal</h4>
+                <ul className="space-y-2 text-sm text-slate-500">
+                  <li>
+                    <Link href="/terminos" className="hover:text-white transition">
+                      Términos y condiciones
+                    </Link>
+                  </li>
+                  <li>
+                    <Link href="/privacidad" className="hover:text-white transition">
+                      Política de privacidad
+                    </Link>
+                  </li>
+                  <li>
+                    <Link href="/cookies" className="hover:text-white transition">
+                      Política de cookies
+                    </Link>
+                  </li>
                 </ul>
               </div>
               <div>
-                <h4 className="font-bold text-white mb-3">Legal</h4>
-                <ul className="space-y-2 text-sm">
-                  <li><Link href="/terminos" className="hover:text-white transition">Términos</Link></li>
-                  <li><Link href="/privacidad" className="hover:text-white transition">Privacidad</Link></li>
-                  <li><Link href="/cookies" className="hover:text-white transition">Cookies</Link></li>
+                <h4 className="font-semibold text-white mb-3 text-sm">Contacto</h4>
+                <ul className="space-y-2 text-sm text-slate-500">
+                  <li>
+                    <a href="mailto:hola@valopo.com" className="hover:text-white transition">
+                      hola@valopo.com
+                    </a>
+                  </li>
                 </ul>
               </div>
             </div>
-            <div className="border-t border-gray-800 pt-8">
-              <p className="text-center text-sm">© {new Date().getFullYear()} Valopo. Hecho con ❤️ para freelancers.</p>
+            <div className="border-t border-slate-800 pt-8">
+              <p className="text-center text-sm text-slate-600">
+                © {new Date().getFullYear()} Valopo. Todos los derechos reservados.
+              </p>
             </div>
           </div>
         </footer>
