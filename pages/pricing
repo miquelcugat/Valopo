@@ -1,0 +1,218 @@
+import Head from 'next/head';
+import { useRouter } from 'next/router';
+import Link from 'next/link';
+import { Clock, Check, ChevronRight } from 'lucide-react';
+
+export default function Pricing() {
+  const router = useRouter();
+
+  return (
+    <>
+      <Head>
+        <title>Planes y precios · Valopo</title>
+        <meta
+          name="description"
+          content="Empieza gratis con 2 proyectos. Sube a Pro por 14,99€/mes para proyectos ilimitados, facturas profesionales e insights de rentabilidad."
+        />
+      </Head>
+
+      <div className="min-h-screen bg-white">
+        {/* Header */}
+        <header className="sticky top-0 z-50 bg-white/90 backdrop-blur-md border-b border-slate-100">
+          <nav className="max-w-5xl mx-auto px-6 py-4 flex justify-between items-center">
+            <Link href="/" className="flex items-center gap-3">
+              <div className="w-10 h-10 bg-gradient-to-br from-blue-600 to-blue-700 rounded-lg flex items-center justify-center shadow-sm">
+                <Clock className="w-5 h-5 text-white" strokeWidth={2.5} />
+              </div>
+              <span className="font-bold text-xl text-slate-900">Valopo</span>
+            </Link>
+            <div className="flex items-center gap-3">
+              <button
+                onClick={() => router.push('/login')}
+                className="px-4 py-2 text-sm text-slate-600 hover:text-slate-900 font-medium transition"
+              >
+                Entrar
+              </button>
+              <button
+                onClick={() => router.push('/login')}
+                className="px-5 py-2 bg-blue-600 text-white rounded-lg font-semibold text-sm hover:bg-blue-700 transition shadow-sm"
+              >
+                Empieza gratis
+              </button>
+            </div>
+          </nav>
+        </header>
+
+        <main className="max-w-5xl mx-auto px-6 py-16 sm:py-24">
+          {/* Header */}
+          <div className="text-center mb-16">
+            <h1 className="text-4xl sm:text-5xl font-bold text-slate-900 mb-4">
+              Planes simples, sin sorpresas
+            </h1>
+            <p className="text-lg text-slate-500 max-w-2xl mx-auto">
+              Empieza gratis. Sube a Pro cuando lo necesites.
+              Sin permanencia, cancela cuando quieras.
+            </p>
+          </div>
+
+          {/* Plans */}
+          <div className="grid md:grid-cols-2 gap-6 max-w-3xl mx-auto mb-20">
+            {/* Free */}
+            <div className="bg-white rounded-2xl border border-slate-200 p-8">
+              <h3 className="font-bold text-xl text-slate-900 mb-1">Free</h3>
+              <p className="text-sm text-slate-500 mb-6">Para empezar y probar</p>
+              <p className="text-4xl font-bold text-slate-900 mb-6">
+                0 €<span className="text-base font-normal text-slate-500">/mes</span>
+              </p>
+              <ul className="space-y-3 mb-8">
+                {[
+                  'Hasta 2 proyectos',
+                  'Cronómetro en vivo',
+                  'Dashboard con estadísticas',
+                  'Historial de 30 días',
+                  'Exportar CSV',
+                  'Gestión de clientes',
+                  'Objetivos de ingresos',
+                  'Insight IA (1 al día)',
+                ].map((f) => (
+                  <li key={f} className="flex items-center gap-2 text-sm text-slate-700">
+                    <Check className="w-4 h-4 text-emerald-600 flex-shrink-0" strokeWidth={3} />
+                    {f}
+                  </li>
+                ))}
+              </ul>
+              <button
+                onClick={() => router.push('/login')}
+                className="w-full px-6 py-3 border border-slate-200 text-slate-700 rounded-lg font-semibold hover:bg-slate-50 transition"
+              >
+                Empieza gratis
+              </button>
+            </div>
+
+            {/* Pro */}
+            <div className="bg-white rounded-2xl border-2 border-blue-600 p-8 relative shadow-sm">
+              <div className="absolute -top-3 left-6 bg-blue-600 text-white text-xs font-bold px-3 py-1 rounded-full">
+                Recomendado
+              </div>
+              <h3 className="font-bold text-xl text-slate-900 mb-1">Pro</h3>
+              <p className="text-sm text-slate-500 mb-6">Para freelancers serios</p>
+              <p className="text-4xl font-bold text-slate-900 mb-6">
+                14,99 €<span className="text-base font-normal text-slate-500">/mes</span>
+              </p>
+              <ul className="space-y-3 mb-8">
+                {[
+                  'Proyectos ilimitados',
+                  'Todo lo de Free',
+                  'Historial completo (sin límite)',
+                  'Exportar PDF con gráficos',
+                  'Facturas profesionales con logo',
+                  'Insights de rentabilidad avanzados',
+                  'Insight IA ilimitado',
+                  'Soporte prioritario',
+                ].map((f) => (
+                  <li key={f} className="flex items-center gap-2 text-sm text-slate-700">
+                    <Check className="w-4 h-4 text-blue-600 flex-shrink-0" strokeWidth={3} />
+                    {f}
+                  </li>
+                ))}
+              </ul>
+              <button
+                onClick={() => router.push('/login')}
+                className="w-full px-6 py-3 bg-blue-600 text-white rounded-lg font-bold hover:bg-blue-700 transition"
+              >
+                Empieza con Pro
+              </button>
+            </div>
+          </div>
+
+          {/* FAQ */}
+          <div className="max-w-2xl mx-auto">
+            <h2 className="text-2xl font-bold text-center text-slate-900 mb-8">
+              Preguntas sobre precios
+            </h2>
+            <div className="space-y-4">
+              {[
+                {
+                  q: '¿Puedo usar Valopo gratis para siempre?',
+                  a: 'Sí. El plan Free no tiene límite de tiempo. Incluye hasta 2 proyectos, cronómetro, dashboard y exportación CSV.',
+                },
+                {
+                  q: '¿Qué pasa si supero los 2 proyectos en Free?',
+                  a: 'Valopo te pedirá que hagas upgrade a Pro para crear más proyectos. Tus datos existentes no se pierden.',
+                },
+                {
+                  q: '¿Puedo cancelar Pro en cualquier momento?',
+                  a: 'Sí. Sin permanencia, sin penalizaciones. Cancelas y sigues teniendo acceso hasta el final del periodo pagado, luego vuelves a Free.',
+                },
+                {
+                  q: '¿Qué métodos de pago aceptáis?',
+                  a: 'Tarjeta de crédito/débito (Visa, Mastercard, American Express). El pago es seguro a través de Stripe.',
+                },
+                {
+                  q: '¿Hay descuento anual?',
+                  a: 'Todavía no, pero estamos trabajando en ello. Si te interesa, escríbenos y te avisaremos.',
+                },
+              ].map(({ q, a }) => (
+                <div
+                  key={q}
+                  className="p-5 bg-white rounded-xl border border-slate-200"
+                >
+                  <h3 className="font-semibold text-slate-900 mb-2">{q}</h3>
+                  <p className="text-sm text-slate-600 leading-relaxed">{a}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* CTA */}
+          <div className="text-center mt-20">
+            <h2 className="text-2xl font-bold text-slate-900 mb-4">
+              ¿Listo para saber cuánto vale tu tiempo?
+            </h2>
+            <button
+              onClick={() => router.push('/login')}
+              className="px-8 py-4 bg-blue-600 text-white rounded-lg font-bold text-lg hover:bg-blue-700 transition shadow-sm inline-flex items-center gap-2"
+            >
+              Crear cuenta gratis
+              <ChevronRight className="w-5 h-5" strokeWidth={2.5} />
+            </button>
+          </div>
+        </main>
+
+        {/* Footer */}
+        <footer className="bg-slate-900 border-t border-slate-800 py-12 mt-20">
+          <div className="max-w-5xl mx-auto px-6">
+            <div className="flex flex-wrap justify-between gap-8 mb-8">
+              <div>
+                <div className="flex items-center gap-2 mb-3">
+                  <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center">
+                    <Clock className="w-4 h-4 text-white" strokeWidth={2.5} />
+                  </div>
+                  <span className="font-bold text-white">Valopo</span>
+                </div>
+                <p className="text-sm text-slate-500">
+                  Para freelancers que quieren saber cuánto vale su tiempo.
+                </p>
+              </div>
+              <div className="flex gap-8">
+                <div>
+                  <h4 className="font-semibold text-white mb-3 text-sm">Legal</h4>
+                  <ul className="space-y-2 text-sm text-slate-500">
+                    <li><Link href="/terminos" className="hover:text-white transition">Términos</Link></li>
+                    <li><Link href="/privacidad" className="hover:text-white transition">Privacidad</Link></li>
+                    <li><Link href="/cookies" className="hover:text-white transition">Cookies</Link></li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+            <div className="border-t border-slate-800 pt-8">
+              <p className="text-center text-sm text-slate-600">
+                © {new Date().getFullYear()} Valopo. Todos los derechos reservados.
+              </p>
+            </div>
+          </div>
+        </footer>
+      </div>
+    </>
+  );
+}
