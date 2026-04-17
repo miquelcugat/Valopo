@@ -1,6 +1,7 @@
 import Head from 'next/head';
 import Link from 'next/link';
 import { Clock } from 'lucide-react';
+import ValopoLogo from '../components/ValopoLogo';
 
 export default function Privacidad() {
   return (
@@ -14,10 +15,8 @@ export default function Privacidad() {
         <header className="bg-white border-b border-slate-200">
           <nav className="max-w-4xl mx-auto px-6 py-4 flex justify-between items-center">
             <Link href="/" className="flex items-center gap-3">
-              <div className="w-10 h-10 bg-gradient-to-br from-blue-600 to-blue-700 rounded-lg flex items-center justify-center shadow-sm">
-                <Clock className="w-5 h-5 text-white" strokeWidth={2.5} />
-              </div>
-              <span className="font-bold text-xl text-slate-900">Valopo</span>
+              <ValopoLogo size={40} />
+              <span className="font-bold text-xl bg-gradient-to-r from-blue-700 to-blue-500 bg-clip-text text-transparent">Valopo</span>
             </Link>
             <Link
               href="/"
