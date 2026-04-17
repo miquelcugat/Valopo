@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/router';
 import { supabase } from '../lib/supabaseClient';
 import { Clock } from 'lucide-react';
+import ValopoLogo from '../components/ValopoLogo';
 
 export default function Auth() {
   const router = useRouter();
@@ -63,10 +64,8 @@ export default function Auth() {
           <div className="bg-white rounded-2xl shadow-sm border border-slate-200 p-8">
             {/* Logo */}
             <div className="text-center mb-8">
-              <div className="w-14 h-14 bg-gradient-to-br from-blue-600 to-blue-700 rounded-xl flex items-center justify-center mx-auto mb-4 shadow-sm">
-                <Clock className="w-7 h-7 text-white" strokeWidth={2.5} />
-              </div>
-              <h1 className="text-2xl font-bold text-slate-900">Valopo</h1>
+              <div className="mx-auto mb-4"><ValopoLogo size={56} /></div>
+              <h1 className="text-2xl font-bold bg-gradient-to-r from-blue-700 to-blue-500 bg-clip-text text-transparent">Valopo</h1>
               <p className="text-sm text-slate-500 mt-1">
                 {isSignUp ? 'Crea tu cuenta gratuita' : 'Entra en tu cuenta'}
               </p>
