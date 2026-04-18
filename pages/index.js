@@ -9,10 +9,11 @@ import {
   BarChart3,
   FileText,
   Shield,
-  Zap,
+  Sparkles,
   ChevronRight,
   Check,
   Smartphone,
+  ArrowDown,
 } from 'lucide-react';
 
 export default function Home() {
@@ -21,10 +22,10 @@ export default function Home() {
   return (
     <>
       <Head>
-        <title>Valopo — Descubre cuánto vale realmente tu tiempo</title>
+        <title>Valopo — ¿Estás cobrando lo que vales?</title>
         <meta
           name="description"
-          content="Define tu objetivo, registra tu trabajo, y Valopo te dice si estás ganando lo que mereces. Para freelancers que quieren cobrar lo que valen."
+          content="Valopo te dice si estás ganando lo que mereces como freelance. Cronómetro, insights de rentabilidad y asesor IA. Gratis para empezar."
         />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
       </Head>
@@ -55,117 +56,179 @@ export default function Home() {
         </header>
 
         {/* Hero */}
-        <section className="max-w-5xl mx-auto px-6 pt-20 pb-24">
-          <div className="text-center max-w-3xl mx-auto">
-            <p className="inline-flex items-center gap-2 text-sm font-semibold text-blue-700 bg-blue-50 px-4 py-1.5 rounded-full mb-8">
-              <Target className="w-4 h-4" strokeWidth={2.5} />
-              Para freelancers que quieren cobrar lo que valen
-            </p>
-
+        <section className="max-w-5xl mx-auto px-6 pt-16 sm:pt-20 pb-8">
+          <div className="text-center max-w-3xl mx-auto mb-12">
             <h1 className="text-5xl sm:text-6xl font-black text-slate-900 leading-[1.1] mb-6 tracking-tight">
-              Descubre cuánto vale
+              ¿Estás cobrando
               <br />
-              <span className="text-blue-600">realmente tu tiempo</span>
+              <span className="bg-gradient-to-r from-blue-600 to-blue-400 bg-clip-text text-transparent">lo que vales?</span>
             </h1>
 
-            <p className="text-lg text-slate-600 mb-10 max-w-2xl mx-auto leading-relaxed">
-              Define tu objetivo. Registra tu trabajo. Valopo te dice si estás
-              ganando lo que mereces, proyecto a proyecto.
+            <p className="text-lg sm:text-xl text-slate-600 mb-8 max-w-2xl mx-auto leading-relaxed">
+              La mayoría de freelancers no sabe su €/hora real.
+              Valopo te lo dice, proyecto a proyecto, y te recomienda qué hacer.
             </p>
 
-            <div className="flex flex-col sm:flex-row gap-3 justify-center mb-6">
+            <div className="flex flex-col sm:flex-row gap-3 justify-center mb-4">
               <button
                 onClick={() => router.push('/login')}
                 className="px-8 py-4 bg-blue-600 text-white rounded-lg font-bold text-lg hover:bg-blue-700 transition shadow-sm inline-flex items-center justify-center gap-2"
               >
-                Empieza gratis
+                Ver cuánto gano de verdad
                 <ChevronRight className="w-5 h-5" strokeWidth={2.5} />
-              </button>
-              <button
-                onClick={() => {
-                  document.getElementById('como-funciona')?.scrollIntoView({ behavior: 'smooth' });
-                }}
-                className="px-8 py-4 border border-slate-200 text-slate-700 rounded-lg font-semibold text-lg hover:bg-slate-50 transition"
-              >
-                Cómo funciona
               </button>
             </div>
 
-            <p className="text-sm text-slate-500">
-              Plan Free sin compromiso. 2 proyectos gratis. Acceso inmediato.
+            <p className="text-sm text-slate-400">
+              Gratis. 2 proyectos. Sin compromiso.
+            </p>
+          </div>
+
+          {/* Dashboard preview - simulated */}
+          <div className="max-w-4xl mx-auto">
+            <div className="bg-slate-950 rounded-2xl p-3 sm:p-4 shadow-2xl">
+              {/* Browser bar */}
+              <div className="flex items-center gap-2 mb-3 px-2">
+                <div className="flex gap-1.5">
+                  <div className="w-3 h-3 rounded-full bg-red-500/80" />
+                  <div className="w-3 h-3 rounded-full bg-yellow-500/80" />
+                  <div className="w-3 h-3 rounded-full bg-green-500/80" />
+                </div>
+                <div className="flex-1 bg-slate-800 rounded-md px-3 py-1 ml-2">
+                  <span className="text-xs text-slate-400">valopo.com/dashboard</span>
+                </div>
+              </div>
+              {/* Simulated dashboard content */}
+              <div className="bg-slate-50 rounded-lg overflow-hidden">
+                <div className="p-4 sm:p-6">
+                  {/* Goal bar */}
+                  <div className="grid sm:grid-cols-3 gap-3 mb-4">
+                    <div className="sm:col-span-2 bg-white rounded-xl border border-slate-200 p-4">
+                      <div className="flex items-start gap-2 mb-2">
+                        <Target className="w-5 h-5 text-blue-600 flex-shrink-0" strokeWidth={2.25} />
+                        <div className="flex-1">
+                          <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wide">Tu objetivo del mes</p>
+                          <div className="flex items-baseline justify-between mt-1">
+                            <p className="text-xl sm:text-2xl font-bold text-slate-900 tabular-nums">
+                              2.847 €
+                              <span className="text-sm font-normal text-slate-400"> / 4.000 €</span>
+                            </p>
+                            <div className="text-right">
+                              <p className="text-lg font-bold text-slate-900">71%</p>
+                              <p className="text-[10px] font-semibold text-emerald-600 flex items-center gap-1">
+                                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
+                                Por encima del ritmo
+                              </p>
+                            </div>
+                          </div>
+                          <div className="h-2 bg-slate-100 rounded-full mt-2 overflow-hidden">
+                            <div className="h-full bg-gradient-to-r from-emerald-500 to-emerald-600 rounded-full" style={{ width: '71%' }} />
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                    <div className="bg-emerald-50 border border-emerald-200 rounded-xl p-4">
+                      <div className="flex items-start gap-2">
+                        <TrendingUp className="w-5 h-5 text-blue-600 flex-shrink-0" strokeWidth={2.25} />
+                        <div>
+                          <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wide">Tu €/h real</p>
+                          <p className="text-xl sm:text-2xl font-bold text-emerald-700 tabular-nums mt-1">
+                            52,40 <span className="text-sm font-normal">€/h</span>
+                          </p>
+                          <p className="text-[10px] text-slate-500 mt-0.5">Objetivo: 45 €/h</p>
+                          <p className="text-[10px] font-semibold text-emerald-600 mt-1 flex items-center gap-1">
+                            <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
+                            +16% sobre tu objetivo
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  {/* IA Advisor banner */}
+                  <div className="bg-slate-900 rounded-xl p-3 sm:p-4 flex items-center justify-between gap-3 mb-4">
+                    <div className="flex items-center gap-2">
+                      <Sparkles className="w-5 h-5 text-blue-400" strokeWidth={2.25} />
+                      <div>
+                        <p className="text-white font-bold text-xs sm:text-sm">Analiza tu rentabilidad con IA</p>
+                        <p className="text-slate-400 text-[10px] sm:text-xs">Descubre qué proyectos te compensan y cuáles no.</p>
+                      </div>
+                    </div>
+                    <span className="text-slate-400 text-xs font-semibold whitespace-nowrap">Analizar →</span>
+                  </div>
+                  {/* Projects with badges */}
+                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 sm:gap-3 mb-4">
+                    {[
+                      { label: 'Hoy', value: '285 €', sub: '5.4h' },
+                      { label: 'Esta semana', value: '1.420 €', sub: '27.1h' },
+                      { label: 'Este mes', value: '2.847 €', sub: '54.3h' },
+                      { label: 'Total', value: '12.340 €', sub: '235.2h' },
+                    ].map((s) => (
+                      <div key={s.label} className="bg-white rounded-lg border border-slate-200 p-3">
+                        <p className="text-[10px] font-medium text-slate-400 uppercase">{s.label}</p>
+                        <p className="text-sm sm:text-lg font-bold text-emerald-600 tabular-nums mt-1">{s.value}</p>
+                        <p className="text-[10px] text-slate-400">{s.sub} trabajadas</p>
+                      </div>
+                    ))}
+                  </div>
+                  {/* Project list preview */}
+                  <div className="bg-white rounded-lg border border-slate-200 p-3">
+                    <div className="flex items-center justify-between mb-2">
+                      <div className="flex items-center gap-2">
+                        <span className="font-bold text-sm text-slate-900">App Redesign</span>
+                        <span className="text-[9px] font-bold text-emerald-700 bg-emerald-50 px-1.5 py-0.5 rounded-full border border-emerald-200 flex items-center gap-1">
+                          <span className="w-1 h-1 rounded-full bg-emerald-500" />
+                          Excelente
+                        </span>
+                      </div>
+                      <span className="text-xs text-slate-500">65€/h</span>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <span className="font-bold text-sm text-slate-900">Web Corporativa</span>
+                        <span className="text-[9px] font-bold text-amber-700 bg-amber-50 px-1.5 py-0.5 rounded-full border border-amber-200 flex items-center gap-1">
+                          <span className="w-1 h-1 rounded-full bg-amber-500" />
+                          Margen ajustado
+                        </span>
+                      </div>
+                      <span className="text-xs text-slate-500">38€/h</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            {/* Caption */}
+            <p className="text-center text-sm text-slate-400 mt-4">
+              Tu dashboard te dice la verdad sobre tu negocio. Cada día.
             </p>
           </div>
         </section>
 
-        {/* How it works */}
-        <section id="como-funciona" className="bg-slate-50 py-24">
+        {/* Social proof placeholder */}
+        <section className="py-16 border-t border-slate-100">
           <div className="max-w-5xl mx-auto px-6">
-            <div className="text-center mb-16">
-              <h2 className="text-3xl sm:text-4xl font-bold text-slate-900 mb-4">
-                Tres pasos para saber lo que vales
-              </h2>
-              <p className="text-lg text-slate-500 max-w-2xl mx-auto">
-                Valopo no es solo un cronómetro. Es tu herramienta para tomar
-                mejores decisiones sobre tu trabajo.
-              </p>
-            </div>
-
-            <div className="grid md:grid-cols-3 gap-8">
-              <div className="bg-white rounded-2xl p-8 border border-slate-200 shadow-sm">
-                <div className="w-12 h-12 bg-blue-50 rounded-xl flex items-center justify-center mb-5">
-                  <Target className="w-6 h-6 text-blue-600" strokeWidth={2.25} />
+            <p className="text-center text-sm font-semibold text-slate-400 uppercase tracking-wide mb-8">
+              Para freelancers que quieren datos, no suposiciones
+            </p>
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-6 text-center">
+              {[
+                { icon: Clock, text: 'Cronómetro en vivo' },
+                { icon: TrendingUp, text: 'Insights de rentabilidad' },
+                { icon: Sparkles, text: 'Asesor IA' },
+                { icon: FileText, text: 'Facturas profesionales' },
+              ].map(({ icon: Icon, text }) => (
+                <div key={text} className="flex flex-col items-center gap-2">
+                  <Icon className="w-6 h-6 text-blue-600" strokeWidth={2} />
+                  <p className="text-sm font-semibold text-slate-700">{text}</p>
                 </div>
-                <div className="text-xs font-bold text-blue-600 uppercase tracking-wide mb-2">
-                  Paso 1
-                </div>
-                <h3 className="font-bold text-xl text-slate-900 mb-3">
-                  Define tu objetivo
-                </h3>
-                <p className="text-slate-600 leading-relaxed">
-                  Configura cuánto quieres ganar por hora y por mes.
-                  Valopo necesita saber tu meta para decirte si la estás cumpliendo.
-                </p>
-              </div>
-
-              <div className="bg-white rounded-2xl p-8 border border-slate-200 shadow-sm">
-                <div className="w-12 h-12 bg-blue-50 rounded-xl flex items-center justify-center mb-5">
-                  <Clock className="w-6 h-6 text-blue-600" strokeWidth={2.25} />
-                </div>
-                <div className="text-xs font-bold text-blue-600 uppercase tracking-wide mb-2">
-                  Paso 2
-                </div>
-                <h3 className="font-bold text-xl text-slate-900 mb-3">
-                  Registra tu trabajo
-                </h3>
-                <p className="text-slate-600 leading-relaxed">
-                  Dale al play, trabaja, y para el cronómetro.
-                  Valopo calcula automáticamente cuánto has ganado en cada sesión.
-                </p>
-              </div>
-
-              <div className="bg-white rounded-2xl p-8 border border-slate-200 shadow-sm">
-                <div className="w-12 h-12 bg-blue-50 rounded-xl flex items-center justify-center mb-5">
-                  <TrendingUp className="w-6 h-6 text-blue-600" strokeWidth={2.25} />
-                </div>
-                <div className="text-xs font-bold text-blue-600 uppercase tracking-wide mb-2">
-                  Paso 3
-                </div>
-                <h3 className="font-bold text-xl text-slate-900 mb-3">
-                  Descubre tu rentabilidad
-                </h3>
-                <p className="text-slate-600 leading-relaxed">
-                  Valopo te muestra qué proyectos son rentables, cuáles no, y
-                  si vas en el ritmo correcto para alcanzar tu objetivo del mes.
-                </p>
-              </div>
+              ))}
             </div>
           </div>
         </section>
 
         {/* Features */}
-        <section className="py-24">
+        <section className="py-20 bg-slate-50">
           <div className="max-w-5xl mx-auto px-6">
-            <div className="text-center mb-16">
+            <div className="text-center mb-14">
               <h2 className="text-3xl sm:text-4xl font-bold text-slate-900 mb-4">
                 Todo lo que necesitas, nada que sobre
               </h2>
@@ -188,6 +251,11 @@ export default function Home() {
                   desc: 'Sabes al instante si un proyecto te compensa o te está costando dinero.',
                 },
                 {
+                  Icon: Sparkles,
+                  title: 'Asesor IA',
+                  desc: 'Analiza tus datos reales y te dice qué hacer hoy para ganar más.',
+                },
+                {
                   Icon: BarChart3,
                   title: 'Análisis por proyecto',
                   desc: 'Gráficos de horas diarias, ingresos semanales y distribución horaria.',
@@ -198,11 +266,6 @@ export default function Home() {
                   desc: 'Genera facturas con tus datos fiscales, logo, y líneas de detalle.',
                 },
                 {
-                  Icon: Smartphone,
-                  title: 'Desde cualquier lugar',
-                  desc: 'Web responsive. Funciona en móvil, tablet y escritorio.',
-                },
-                {
                   Icon: Shield,
                   title: 'Privado y seguro',
                   desc: 'Tus datos son tuyos. Sin publicidad. Sin venta de datos.',
@@ -210,7 +273,7 @@ export default function Home() {
               ].map(({ Icon, title, desc }) => (
                 <div
                   key={title}
-                  className="p-6 rounded-2xl border border-slate-200 hover:border-blue-200 hover:shadow-sm transition group"
+                  className="p-6 bg-white rounded-2xl border border-slate-200 hover:border-blue-200 hover:shadow-sm transition group"
                 >
                   <Icon
                     className="w-6 h-6 text-blue-600 mb-4 group-hover:scale-110 transition-transform"
@@ -225,9 +288,9 @@ export default function Home() {
         </section>
 
         {/* Pricing */}
-        <section className="bg-slate-50 py-24">
+        <section className="py-20">
           <div className="max-w-5xl mx-auto px-6">
-            <div className="text-center mb-16">
+            <div className="text-center mb-14">
               <h2 className="text-3xl sm:text-4xl font-bold text-slate-900 mb-4">
                 Planes simples, sin sorpresas
               </h2>
@@ -248,8 +311,10 @@ export default function Home() {
                   {[
                     'Hasta 2 proyectos',
                     'Cronómetro en vivo',
-                    'Dashboard con stats',
-                    'Historial de 30 días',
+                    'Dashboard con estadísticas',
+                    'Gestión de clientes',
+                    'Objetivos de ingresos',
+                    'Insight IA (1 al día)',
                     'Exportar CSV',
                   ].map((f) => (
                     <li key={f} className="flex items-center gap-2 text-sm text-slate-700">
@@ -280,10 +345,12 @@ export default function Home() {
                   {[
                     'Proyectos ilimitados',
                     'Todo lo de Free',
-                    'Historial completo',
+                    'Historial completo (sin límite)',
                     'Exportar PDF con gráficos',
                     'Facturas profesionales con logo',
-                    'Insights de rentabilidad',
+                    'Insights de rentabilidad avanzados',
+                    'Insight IA ilimitado',
+                    'Soporte prioritario',
                   ].map((f) => (
                     <li key={f} className="flex items-center gap-2 text-sm text-slate-700">
                       <Check className="w-4 h-4 text-blue-600 flex-shrink-0" strokeWidth={3} />
@@ -303,7 +370,7 @@ export default function Home() {
         </section>
 
         {/* FAQ */}
-        <section className="py-24">
+        <section className="py-20 bg-slate-50">
           <div className="max-w-2xl mx-auto px-6">
             <h2 className="text-3xl font-bold text-center text-slate-900 mb-12">
               Preguntas frecuentes
@@ -355,7 +422,7 @@ export default function Home() {
               onClick={() => router.push('/login')}
               className="px-8 py-4 bg-blue-600 text-white rounded-lg font-bold text-lg hover:bg-blue-500 transition shadow-lg inline-flex items-center gap-2"
             >
-              Crear cuenta gratis
+              Ver cuánto gano de verdad
               <ChevronRight className="w-5 h-5" strokeWidth={2.5} />
             </button>
           </div>
@@ -387,6 +454,11 @@ export default function Home() {
                       Entrar
                     </button>
                   </li>
+                  <li>
+                    <Link href="/pricing" className="hover:text-white transition">
+                      Precios
+                    </Link>
+                  </li>
                 </ul>
               </div>
               <div>
@@ -413,8 +485,8 @@ export default function Home() {
                 <h4 className="font-semibold text-white mb-3 text-sm">Contacto</h4>
                 <ul className="space-y-2 text-sm text-slate-500">
                   <li>
-                    <a href="mailto:hola@valopo.com" className="hover:text-white transition">
-                      hola@valopo.com
+                    <a href="mailto:info@valopo.com" className="hover:text-white transition">
+                      info@valopo.com
                     </a>
                   </li>
                 </ul>
