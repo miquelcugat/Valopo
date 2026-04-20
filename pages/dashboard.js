@@ -83,6 +83,9 @@ export default function Dashboard() {
   const [savingExpense, setSavingExpense] = useState(false);
   const [expensesListOpen, setExpensesListOpen] = useState(null); // projectId whose expenses are shown
 
+  // Expanded project card
+  const [expandedProjectId, setExpandedProjectId] = useState(null);
+
   // Toast
   const [toast, setToast] = useState(null);
 
@@ -1411,7 +1414,7 @@ export default function Dashboard() {
           <div className="bg-white rounded-2xl border border-slate-200 shadow-sm mb-8">
             <div className="p-6 sm:p-8 border-b border-slate-100 flex justify-between items-start gap-4 flex-wrap">
               <div>
-                <h2 className="text-xl font-bold text-slate-900 mb-1">Tus proyectos</h2>
+                <h2 className="text-xl font-bold text-slate-900 mb-1">Mis proyectos</h2>
                 <p className="text-sm text-slate-500">Crea, edita y borra los proyectos que facturas.</p>
               </div>
               {!isPro && (
@@ -1716,11 +1719,14 @@ export default function Dashboard() {
                         )}
                       </div>
                     ) : (
-                      <div className="space-y-3">
-                        {/* Header: name + badge */}
-                        <div className="flex items-start justify-between gap-3">
+                      <div>
+                        {/* COLLAPSED VIEW (always visible) */}
+                        <div
+                          className="flex items-center justify-between gap-3 cursor-pointer"
+                          onClick={() => setExpandedProjectId(expandedProjectId === project.id ? null : project.id)}
+                        >
                           <div className="flex-1 min-w-0">
-                            <div className="flex items-center gap-2 flex-wrap mb-1">
+                            <div className="flex items-center gap-2 flex-wrap">
                               <h3 className="font-bold text-slate-900 truncate text-base">{project.name}</h3>
                               {hourlyGoal && (() => {
                                 const r = isFixed ? effectiveRate : (Number(project.rate) || 0);
@@ -1751,7 +1757,7 @@ export default function Dashboard() {
                                   return (
                                     <span className="inline-flex items-center gap-1 text-[10px] font-bold text-amber-700 bg-amber-50 px-2 py-0.5 rounded-full border border-amber-200">
                                       <span className="w-1.5 h-1.5 rounded-full bg-amber-500" />
-                                      Margen ajustado
+                                      Ajustado
                                     </span>
                                   );
                                 } else {
@@ -1763,9 +1769,51 @@ export default function Dashboard() {
                                   );
                                 }
                               })()}
+                              {project.completed_at && (
+                                <span className="inline-flex items-center gap-1 text-[10px] font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-200">
+                                  <Check className="w-2.5 h-2.5" strokeWidth={3} />
+                                  Completado
+                                </span>
+                              )}
                             </div>
+                            <p className="text-sm text-slate-500 mt-1 tabular-nums">
+                              {hours > 0 ? (
+                                <>
+                                  <span className="font-bold text-slate-900">{effectiveRateNet.toFixed(0)}€/h</span>
+                                  <span className="text-slate-400"> real</span>
+                                  <span className="text-slate-300 mx-1.5">·</span>
+                                  <span>{hours.toFixed(1)}h</span>
+                                </>
+                              ) : isFixed ? (
+                                <>
+                                  <span className="font-bold text-slate-900">{formatEUR(Number(project.fixed_price) || 0)}</span>
+                                  <span className="text-slate-400"> · precio cerrado</span>
+                                </>
+                              ) : (
+                                <>
+                                  <span className="font-bold text-slate-900">€{project.rate}/h</span>
+                                  <span className="text-slate-400"> · sin sesiones</span>
+                                </>
+                              )}
+                            </p>
+                          </div>
+                          <div className="flex-shrink-0 text-slate-400">
+                            <svg
+                              className={`w-5 h-5 transition-transform ${expandedProjectId === project.id ? 'rotate-180' : ''}`}
+                              fill="none"
+                              viewBox="0 0 24 24"
+                              stroke="currentColor"
+                              strokeWidth={2.5}
+                            >
+                              <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
+                            </svg>
+                          </div>
+                        </div>
 
-                            {/* Tags row: billing type + completed + client */}
+                        {/* EXPANDED VIEW */}
+                        {expandedProjectId === project.id && (
+                          <div className="mt-4 pt-4 border-t border-slate-100 space-y-4">
+                            {/* Tags + client */}
                             <div className="flex items-center gap-1.5 flex-wrap">
                               {isFixed ? (
                                 <span className="inline-flex items-center gap-1 text-blue-700 bg-blue-50 px-1.5 py-0.5 rounded text-[10px] font-semibold border border-blue-200">
@@ -1776,12 +1824,6 @@ export default function Dashboard() {
                                   €{project.rate}/h
                                 </span>
                               )}
-                              {project.completed_at && (
-                                <span className="inline-flex items-center gap-1 text-emerald-700 bg-emerald-50 px-1.5 py-0.5 rounded text-[10px] font-semibold border border-emerald-200">
-                                  <Check className="w-2.5 h-2.5" strokeWidth={3} />
-                                  Completado
-                                </span>
-                              )}
                               {project.client_id && (
                                 <span className="inline-flex items-center gap-1 text-slate-600 text-xs">
                                   <User className="w-3 h-3" strokeWidth={2.25} />
@@ -1789,136 +1831,119 @@ export default function Dashboard() {
                                 </span>
                               )}
                             </div>
-                          </div>
-                        </div>
 
-                        {/* Metrics grid */}
-                        <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
-                          <div className="bg-slate-50 rounded-lg p-2.5">
-                            <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wide mb-0.5">Horas</p>
-                            <p className="text-sm font-bold text-slate-900 tabular-nums">{hours.toFixed(1)}h</p>
-                          </div>
-                          <div className="bg-emerald-50 rounded-lg p-2.5">
-                            <p className="text-[10px] font-bold text-emerald-600 uppercase tracking-wide mb-0.5">
-                              {isFixed ? 'Precio fijo' : 'Ingresos'}
-                            </p>
-                            <p className="text-sm font-bold text-emerald-700 tabular-nums">{formatEUR(earnings)}</p>
-                          </div>
-                          {expensesTotal > 0 ? (
-                            <>
-                              <div className="bg-red-50 rounded-lg p-2.5">
-                                <p className="text-[10px] font-bold text-red-600 uppercase tracking-wide mb-0.5">Gastos</p>
-                                <p className="text-sm font-bold text-red-700 tabular-nums">-{formatEUR(expensesTotal)}</p>
+                            {/* Metrics grid */}
+                            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+                              <div className="bg-slate-50 rounded-lg p-2.5">
+                                <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wide mb-0.5">Horas</p>
+                                <p className="text-sm font-bold text-slate-900 tabular-nums">{hours.toFixed(1)}h</p>
                               </div>
-                              <div className="bg-blue-50 rounded-lg p-2.5">
-                                <p className="text-[10px] font-bold text-blue-600 uppercase tracking-wide mb-0.5">
-                                  {hours > 0 ? '€/h real neto' : 'Neto'}
+                              <div className="bg-emerald-50 rounded-lg p-2.5">
+                                <p className="text-[10px] font-bold text-emerald-600 uppercase tracking-wide mb-0.5">
+                                  {isFixed ? 'Precio fijo' : 'Ingresos'}
                                 </p>
-                                <p className="text-sm font-bold text-blue-700 tabular-nums">
-                                  {hours > 0 ? `${effectiveRateNet.toFixed(0)}€/h` : formatEUR(netEarnings)}
-                                </p>
+                                <p className="text-sm font-bold text-emerald-700 tabular-nums">{formatEUR(earnings)}</p>
                               </div>
-                            </>
-                          ) : hours > 0 && isFixed ? (
-                            <>
-                              <div className="bg-blue-50 rounded-lg p-2.5">
-                                <p className="text-[10px] font-bold text-blue-600 uppercase tracking-wide mb-0.5">€/h real</p>
-                                <p className="text-sm font-bold text-blue-700 tabular-nums">{effectiveRateNet.toFixed(0)}€/h</p>
-                              </div>
-                              {project.estimated_hours && (
+                              {expensesTotal > 0 ? (
+                                <>
+                                  <div className="bg-red-50 rounded-lg p-2.5">
+                                    <p className="text-[10px] font-bold text-red-600 uppercase tracking-wide mb-0.5">Gastos</p>
+                                    <p className="text-sm font-bold text-red-700 tabular-nums">-{formatEUR(expensesTotal)}</p>
+                                  </div>
+                                  <div className="bg-blue-50 rounded-lg p-2.5">
+                                    <p className="text-[10px] font-bold text-blue-600 uppercase tracking-wide mb-0.5">Neto</p>
+                                    <p className="text-sm font-bold text-blue-700 tabular-nums">{formatEUR(netEarnings)}</p>
+                                  </div>
+                                </>
+                              ) : project.estimated_hours ? (
                                 <div className="bg-slate-50 rounded-lg p-2.5">
                                   <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wide mb-0.5">Estimado</p>
                                   <p className="text-sm font-bold text-slate-700 tabular-nums">{project.estimated_hours}h</p>
                                 </div>
-                              )}
-                            </>
-                          ) : project.estimated_hours ? (
-                            <div className="bg-slate-50 rounded-lg p-2.5">
-                              <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wide mb-0.5">Estimado</p>
-                              <p className="text-sm font-bold text-slate-700 tabular-nums">{project.estimated_hours}h</p>
+                              ) : null}
                             </div>
-                          ) : null}
-                        </div>
 
-                        {/* Expenses list expandable */}
-                        {projectExpenses.length > 0 && (
-                          <>
-                            <button
-                              onClick={() => setExpensesListOpen(expensesExpanded ? null : project.id)}
-                              className="text-xs text-blue-600 hover:underline font-semibold inline-flex items-center gap-1"
-                            >
-                              {expensesExpanded ? 'Ocultar' : 'Ver'} {projectExpenses.length} gasto{projectExpenses.length !== 1 ? 's' : ''}
-                              <span className={`transition-transform ${expensesExpanded ? 'rotate-180' : ''}`}>▾</span>
-                            </button>
-                            {expensesExpanded && (
-                              <div className="space-y-2 bg-slate-50 rounded-lg p-3 border border-slate-200">
-                                {projectExpenses.map((exp) => (
-                                  <div key={exp.id} className="flex items-center justify-between gap-2 text-sm">
-                                    <div className="flex-1 min-w-0">
-                                      <p className="font-semibold text-slate-900 truncate text-sm">{exp.description}</p>
-                                      <p className="text-[11px] text-slate-500">
-                                        {new Date(exp.expense_date).toLocaleDateString('es-ES')}
-                                        {exp.notes && ` · ${exp.notes}`}
-                                      </p>
-                                    </div>
-                                    <span className="font-bold text-red-600 tabular-nums whitespace-nowrap text-sm">
-                                      -{formatEUR(Number(exp.amount))}
-                                    </span>
-                                    <button
-                                      onClick={() => deleteExpense(exp.id)}
-                                      className="text-slate-400 hover:text-red-600 transition p-1"
-                                      title="Eliminar gasto"
-                                    >
-                                      <X className="w-4 h-4" strokeWidth={2.5} />
-                                    </button>
+                            {/* Expenses list */}
+                            {projectExpenses.length > 0 && (
+                              <>
+                                <button
+                                  onClick={() => setExpensesListOpen(expensesExpanded ? null : project.id)}
+                                  className="text-xs text-blue-600 hover:underline font-semibold inline-flex items-center gap-1"
+                                >
+                                  {expensesExpanded ? 'Ocultar' : 'Ver'} {projectExpenses.length} gasto{projectExpenses.length !== 1 ? 's' : ''}
+                                  <span className={`transition-transform ${expensesExpanded ? 'rotate-180' : ''}`}>▾</span>
+                                </button>
+                                {expensesExpanded && (
+                                  <div className="space-y-2 bg-slate-50 rounded-lg p-3 border border-slate-200">
+                                    {projectExpenses.map((exp) => (
+                                      <div key={exp.id} className="flex items-center justify-between gap-2 text-sm">
+                                        <div className="flex-1 min-w-0">
+                                          <p className="font-semibold text-slate-900 truncate text-sm">{exp.description}</p>
+                                          <p className="text-[11px] text-slate-500">
+                                            {new Date(exp.expense_date).toLocaleDateString('es-ES')}
+                                            {exp.notes && ` · ${exp.notes}`}
+                                          </p>
+                                        </div>
+                                        <span className="font-bold text-red-600 tabular-nums whitespace-nowrap text-sm">
+                                          -{formatEUR(Number(exp.amount))}
+                                        </span>
+                                        <button
+                                          onClick={() => deleteExpense(exp.id)}
+                                          className="text-slate-400 hover:text-red-600 transition p-1"
+                                          title="Eliminar gasto"
+                                        >
+                                          <X className="w-4 h-4" strokeWidth={2.5} />
+                                        </button>
+                                      </div>
+                                    ))}
                                   </div>
-                                ))}
-                              </div>
+                                )}
+                              </>
                             )}
-                          </>
-                        )}
 
-                        {/* Action buttons */}
-                        <div className="flex gap-2 pt-1">
-                          {isFixed && (
-                            <button
-                              onClick={() => toggleProjectComplete(project)}
-                              className={`flex-1 sm:flex-initial px-3 py-2 rounded-lg transition text-sm font-semibold ${
-                                project.completed_at
-                                  ? 'bg-slate-100 text-slate-700 hover:bg-slate-200'
-                                  : 'bg-emerald-600 text-white hover:bg-emerald-700'
-                              }`}
-                            >
-                              {project.completed_at ? 'Reabrir' : 'Completar'}
-                            </button>
-                          )}
-                          <button
-                            onClick={() => openExpenseModal(project.id)}
-                            className="flex-1 sm:flex-initial px-3 py-2 bg-slate-100 text-slate-700 rounded-lg hover:bg-slate-200 transition text-sm font-semibold inline-flex items-center justify-center gap-1"
-                          >
-                            <Plus className="w-3.5 h-3.5" strokeWidth={2.5} />
-                            Gasto
-                          </button>
-                          <button
-                            onClick={() => startEdit(project)}
-                            className="flex-1 sm:flex-initial px-3 py-2 bg-slate-100 text-slate-700 rounded-lg hover:bg-slate-200 transition text-sm font-semibold"
-                          >
-                            Editar
-                          </button>
-                          <button
-                            onClick={() =>
-                              setConfirmDelete({
-                                type: 'project',
-                                id: project.id,
-                                label: project.name,
-                              })
-                            }
-                            className="px-3 py-2 bg-red-50 text-red-700 rounded-lg hover:bg-red-100 transition text-sm font-semibold inline-flex items-center justify-center"
-                            title="Borrar proyecto"
-                          >
-                            <X className="w-4 h-4" strokeWidth={2.5} />
-                          </button>
-                        </div>
+                            {/* Action buttons */}
+                            <div className="flex gap-2 pt-1">
+                              {isFixed && (
+                                <button
+                                  onClick={() => toggleProjectComplete(project)}
+                                  className={`flex-1 sm:flex-initial px-3 py-2 rounded-lg transition text-sm font-semibold ${
+                                    project.completed_at
+                                      ? 'bg-slate-100 text-slate-700 hover:bg-slate-200'
+                                      : 'bg-emerald-600 text-white hover:bg-emerald-700'
+                                  }`}
+                                >
+                                  {project.completed_at ? 'Reabrir' : 'Completar'}
+                                </button>
+                              )}
+                              <button
+                                onClick={() => openExpenseModal(project.id)}
+                                className="flex-1 sm:flex-initial px-3 py-2 bg-slate-100 text-slate-700 rounded-lg hover:bg-slate-200 transition text-sm font-semibold inline-flex items-center justify-center gap-1"
+                              >
+                                <Plus className="w-3.5 h-3.5" strokeWidth={2.5} />
+                                Gasto
+                              </button>
+                              <button
+                                onClick={() => startEdit(project)}
+                                className="flex-1 sm:flex-initial px-3 py-2 bg-slate-100 text-slate-700 rounded-lg hover:bg-slate-200 transition text-sm font-semibold"
+                              >
+                                Editar
+                              </button>
+                              <button
+                                onClick={() =>
+                                  setConfirmDelete({
+                                    type: 'project',
+                                    id: project.id,
+                                    label: project.name,
+                                  })
+                                }
+                                className="px-3 py-2 bg-red-50 text-red-700 rounded-lg hover:bg-red-100 transition text-sm font-semibold inline-flex items-center justify-center"
+                                title="Borrar proyecto"
+                              >
+                                <X className="w-4 h-4" strokeWidth={2.5} />
+                              </button>
+                            </div>
+                          </div>
+                        )}
                       </div>
                     )}
                   </div>
