@@ -38,6 +38,7 @@ export default function Projects() {
   const [projects, setProjects] = useState([]);
   const [sessions, setSessions] = useState([]);
   const [clients, setClients] = useState([]);
+  const [expenses, setExpenses] = useState([]);
   const [profile, setProfile] = useState(null);
   const [loading, setLoading] = useState(true);
 
@@ -102,6 +103,7 @@ export default function Projects() {
         { data: sessionsData, error: sErr },
         { data: clientsData, error: cErr },
         { data: profileData },
+        { data: expensesData },
       ] = await Promise.all([
         supabase
           .from('projects')
@@ -123,6 +125,11 @@ export default function Projects() {
           .select('hourly_rate_goal, monthly_income_goal')
           .eq('user_id', userId)
           .maybeSingle(),
+        supabase
+          .from('project_expenses')
+          .select('*')
+          .eq('user_id', userId)
+          .order('expense_date', { ascending: false }),
       ]);
       if (pErr) throw pErr;
       if (sErr) throw sErr;
@@ -132,6 +139,7 @@ export default function Projects() {
       setSessions(sessionsData || []);
       setClients(clientsData || []);
       setProfile(profileData || null);
+      setExpenses(expensesData || []);
 
       const fromQuery = router.query.id;
       if (fromQuery && (projectsData || []).some((p) => p.id === fromQuery)) {
@@ -705,6 +713,106 @@ export default function Projects() {
             </div>
           ) : (
             <>
+              {/* Global profitability chart */}
+              {(() => {
+                const chartData = projects.map((p) => {
+                  const projSessions = sessions.filter(s => s.project_id === p.id);
+                  const projHours = projSessions.reduce((a, s) => a + (Number(s.duration_seconds) || 0) / 3600, 0);
+                  const isFixed = p.billing_type === 'fixed';
+                  const gross = isFixed
+                    ? Number(p.fixed_price || 0)
+                    : projSessions.reduce((a, s) => a + Number(s.earned || 0), 0);
+                  const projExp = expenses.filter(e => e.project_id === p.id);
+                  const expTotal = projExp.reduce((a, e) => a + Number(e.amount || 0), 0);
+                  const net = gross - expTotal;
+                  return {
+                    name: p.name.length > 18 ? p.name.slice(0, 16) + '…' : p.name,
+                    fullName: p.name,
+                    ingresos: Math.round(gross * 100) / 100,
+                    gastos: Math.round(expTotal * 100) / 100,
+                    neto: Math.round(net * 100) / 100,
+                    hours: projHours,
+                    isFixed,
+                  };
+                }).filter(p => p.ingresos > 0 || p.gastos > 0)
+                  .sort((a, b) => b.neto - a.neto);
+
+                if (chartData.length === 0) return null;
+
+                const totalIngresos = chartData.reduce((a, p) => a + p.ingresos, 0);
+                const totalGastos = chartData.reduce((a, p) => a + p.gastos, 0);
+                const totalNeto = totalIngresos - totalGastos;
+
+                return (
+                  <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-6 mb-6">
+                    <div className="flex flex-wrap items-center justify-between gap-4 mb-5">
+                      <div>
+                        <h2 className="font-bold text-lg text-slate-900">Rentabilidad por proyecto</h2>
+                        <p className="text-sm text-slate-500">Ingresos vs gastos de cada proyecto</p>
+                      </div>
+                      <div className="flex gap-4 text-right">
+                        <div>
+                          <p className="text-[10px] font-bold text-slate-400 uppercase">Total ingresos</p>
+                          <p className="text-lg font-bold text-emerald-600 tabular-nums">{formatEUR(totalIngresos)}</p>
+                        </div>
+                        <div>
+                          <p className="text-[10px] font-bold text-slate-400 uppercase">Total gastos</p>
+                          <p className="text-lg font-bold text-red-600 tabular-nums">-{formatEUR(totalGastos)}</p>
+                        </div>
+                        <div>
+                          <p className="text-[10px] font-bold text-slate-400 uppercase">Neto</p>
+                          <p className="text-lg font-bold text-slate-900 tabular-nums">{formatEUR(totalNeto)}</p>
+                        </div>
+                      </div>
+                    </div>
+
+                    <ResponsiveContainer width="100%" height={Math.max(200, chartData.length * 50 + 40)}>
+                      <BarChart
+                        data={chartData}
+                        layout="vertical"
+                        margin={{ top: 5, right: 20, left: 0, bottom: 0 }}
+                        barGap={2}
+                      >
+                        <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" horizontal={false} />
+                        <XAxis
+                          type="number"
+                          tick={{ fontSize: 10, fill: '#64748b' }}
+                          tickFormatter={(v) => v >= 1000 ? `${(v/1000).toFixed(1)}k` : v}
+                        />
+                        <YAxis
+                          type="category"
+                          dataKey="name"
+                          tick={{ fontSize: 11, fill: '#334155' }}
+                          width={140}
+                        />
+                        <Tooltip
+                          contentStyle={{
+                            backgroundColor: '#fff',
+                            border: '1px solid #e2e8f0',
+                            borderRadius: 8,
+                            fontSize: 12,
+                          }}
+                          formatter={(value, name) => [formatEUR(value), name === 'ingresos' ? 'Ingresos' : 'Gastos']}
+                          labelFormatter={(label, payload) => payload?.[0]?.payload?.fullName || label}
+                        />
+                        <Bar dataKey="ingresos" fill="#10b981" radius={[0, 4, 4, 0]} name="ingresos" />
+                        <Bar dataKey="gastos" fill="#ef4444" radius={[0, 4, 4, 0]} name="gastos" />
+                      </BarChart>
+                    </ResponsiveContainer>
+
+                    <div className="flex items-center gap-4 mt-4 text-xs text-slate-500">
+                      <span className="inline-flex items-center gap-1.5">
+                        <span className="w-3 h-3 rounded-sm bg-emerald-500" />
+                        Ingresos
+                      </span>
+                      <span className="inline-flex items-center gap-1.5">
+                        <span className="w-3 h-3 rounded-sm bg-red-500" />
+                        Gastos
+                      </span>
+                    </div>
+                  </div>
+                );
+              })()}
               <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-6 mb-6">
                 <div className="flex gap-2 mb-5 border-b border-slate-100">
                   <button
