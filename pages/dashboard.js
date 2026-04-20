@@ -45,6 +45,9 @@ export default function Dashboard() {
   const [newProjectName, setNewProjectName] = useState('');
   const [newProjectRate, setNewProjectRate] = useState('');
   const [newProjectClientId, setNewProjectClientId] = useState('');
+  const [newProjectBillingType, setNewProjectBillingType] = useState('hourly');
+  const [newProjectFixedPrice, setNewProjectFixedPrice] = useState('');
+  const [newProjectEstimatedHours, setNewProjectEstimatedHours] = useState('');
   const [savingProject, setSavingProject] = useState(false);
 
   // Edit project
@@ -354,7 +357,9 @@ export default function Dashboard() {
     setSavingNote(true);
     try {
       const project = projects.find((p) => p.id === pendingSession.projectId);
-      const earned = (pendingSession.duration / 3600) * (project?.rate || 0);
+      // For fixed-price projects, earned is 0 per session (total = fixed_price at project level)
+      const isFixed = project?.billing_type === 'fixed';
+      const earned = isFixed ? 0 : (pendingSession.duration / 3600) * (project?.rate || 0);
       const noteToSave = withNote ? noteText.trim() || null : null;
 
       const { error } = await supabase.from('sessions').insert([
@@ -423,7 +428,8 @@ export default function Dashboard() {
     try {
       const durationSeconds = Math.round(hours * 3600 + minutes * 60);
       const project = projects.find((p) => p.id === manualProjectId);
-      const earned = (durationSeconds / 3600) * (project?.rate || 0);
+      const isFixed = project?.billing_type === 'fixed';
+      const earned = isFixed ? 0 : (durationSeconds / 3600) * (project?.rate || 0);
 
       // Use the selected date with current time as end_time
       const endDate = new Date(manualDate + 'T' + new Date().toTimeString().slice(0, 8));
@@ -495,15 +501,33 @@ export default function Dashboard() {
   // ---------- Project actions ----------
   const addProject = async () => {
     const name = newProjectName.trim();
-    const rate = parseFloat(newProjectRate);
 
     if (!name) {
       showToast('error', 'Introduce un nombre de proyecto');
       return;
     }
-    if (Number.isNaN(rate) || rate <= 0) {
-      showToast('error', 'Introduce una tarifa válida');
-      return;
+
+    let rate = null;
+    let fixedPrice = null;
+    let estimatedHours = null;
+
+    if (newProjectBillingType === 'hourly') {
+      rate = parseFloat(newProjectRate);
+      if (Number.isNaN(rate) || rate <= 0) {
+        showToast('error', 'Introduce una tarifa válida');
+        return;
+      }
+    } else if (newProjectBillingType === 'fixed') {
+      fixedPrice = parseFloat(newProjectFixedPrice);
+      if (Number.isNaN(fixedPrice) || fixedPrice <= 0) {
+        showToast('error', 'Introduce un precio válido');
+        return;
+      }
+      rate = 0;
+      if (newProjectEstimatedHours) {
+        const est = parseFloat(newProjectEstimatedHours);
+        if (!Number.isNaN(est) && est > 0) estimatedHours = est;
+      }
     }
 
     if (!isPro && projects.length >= limits.maxProjects) {
@@ -521,8 +545,11 @@ export default function Dashboard() {
           {
             user_id: user.id,
             name,
-            rate,
+            rate: rate || 0,
             client_id: newProjectClientId || null,
+            billing_type: newProjectBillingType,
+            fixed_price: fixedPrice,
+            estimated_hours: estimatedHours,
           },
         ])
         .select();
@@ -537,6 +564,9 @@ export default function Dashboard() {
       setNewProjectName('');
       setNewProjectRate('');
       setNewProjectClientId('');
+      setNewProjectFixedPrice('');
+      setNewProjectEstimatedHours('');
+      setNewProjectBillingType('hourly');
       showToast('success', 'Proyecto creado');
       loadData(user.id);
     } catch (error) {
@@ -1076,7 +1106,9 @@ export default function Dashboard() {
                       <option value="">— Selecciona un proyecto —</option>
                       {projects.map((p) => (
                         <option key={p.id} value={p.id}>
-                          {p.name} · €{p.rate}/h
+                          {p.name} · {p.billing_type === 'fixed'
+                            ? `Precio cerrado ${Number(p.fixed_price || 0)}€`
+                            : `€${p.rate}/h`}
                         </option>
                       ))}
                     </select>
@@ -1213,33 +1245,101 @@ export default function Dashboard() {
                 </div>
               ) : (
                 <div className="space-y-3">
-                  <div className="grid sm:grid-cols-[1fr_180px_auto] gap-3">
-                    <input
-                      type="text"
-                      placeholder="Nombre del proyecto"
-                      value={newProjectName}
-                      onChange={(e) => setNewProjectName(e.target.value)}
-                      onKeyDown={(e) => e.key === 'Enter' && addProject()}
-                      className="px-4 py-3 bg-white border border-slate-300 rounded-lg focus:outline-none focus:border-blue-600 focus:ring-2 focus:ring-blue-100 transition"
-                    />
-                    <input
-                      type="number"
-                      step="0.01"
-                      min="0"
-                      placeholder="Tarifa €/hora"
-                      value={newProjectRate}
-                      onChange={(e) => setNewProjectRate(e.target.value)}
-                      onKeyDown={(e) => e.key === 'Enter' && addProject()}
-                      className="px-4 py-3 bg-white border border-slate-300 rounded-lg focus:outline-none focus:border-blue-600 focus:ring-2 focus:ring-blue-100 transition tabular-nums"
-                    />
+                  {/* Billing type tabs */}
+                  <div className="flex gap-2 mb-1">
                     <button
-                      onClick={addProject}
-                      disabled={savingProject}
-                      className="px-6 py-3 bg-blue-600 text-white rounded-lg font-bold hover:bg-blue-700 active:scale-[0.99] transition disabled:opacity-60 whitespace-nowrap"
+                      type="button"
+                      onClick={() => setNewProjectBillingType('hourly')}
+                      className={`flex-1 px-3 py-2 text-xs font-semibold rounded-lg transition ${
+                        newProjectBillingType === 'hourly'
+                          ? 'bg-blue-600 text-white'
+                          : 'bg-white text-slate-600 border border-slate-200 hover:border-blue-300'
+                      }`}
                     >
-                      {savingProject ? 'Creando…' : '+ Añadir'}
+                      Por horas
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setNewProjectBillingType('fixed')}
+                      className={`flex-1 px-3 py-2 text-xs font-semibold rounded-lg transition ${
+                        newProjectBillingType === 'fixed'
+                          ? 'bg-blue-600 text-white'
+                          : 'bg-white text-slate-600 border border-slate-200 hover:border-blue-300'
+                      }`}
+                    >
+                      Precio cerrado
                     </button>
                   </div>
+
+                  {/* Fields per type */}
+                  {newProjectBillingType === 'hourly' ? (
+                    <div className="grid sm:grid-cols-[1fr_180px_auto] gap-3">
+                      <input
+                        type="text"
+                        placeholder="Nombre del proyecto"
+                        value={newProjectName}
+                        onChange={(e) => setNewProjectName(e.target.value)}
+                        onKeyDown={(e) => e.key === 'Enter' && addProject()}
+                        className="px-4 py-3 bg-white border border-slate-300 rounded-lg focus:outline-none focus:border-blue-600 focus:ring-2 focus:ring-blue-100 transition"
+                      />
+                      <input
+                        type="number"
+                        step="0.01"
+                        min="0"
+                        placeholder="Tarifa €/hora"
+                        value={newProjectRate}
+                        onChange={(e) => setNewProjectRate(e.target.value)}
+                        onKeyDown={(e) => e.key === 'Enter' && addProject()}
+                        className="px-4 py-3 bg-white border border-slate-300 rounded-lg focus:outline-none focus:border-blue-600 focus:ring-2 focus:ring-blue-100 transition tabular-nums"
+                      />
+                      <button
+                        onClick={addProject}
+                        disabled={savingProject}
+                        className="px-6 py-3 bg-blue-600 text-white rounded-lg font-bold hover:bg-blue-700 active:scale-[0.99] transition disabled:opacity-60 whitespace-nowrap"
+                      >
+                        {savingProject ? 'Creando…' : '+ Añadir'}
+                      </button>
+                    </div>
+                  ) : (
+                    <>
+                      <div className="grid sm:grid-cols-[1fr_180px_auto] gap-3">
+                        <input
+                          type="text"
+                          placeholder="Nombre del proyecto"
+                          value={newProjectName}
+                          onChange={(e) => setNewProjectName(e.target.value)}
+                          onKeyDown={(e) => e.key === 'Enter' && addProject()}
+                          className="px-4 py-3 bg-white border border-slate-300 rounded-lg focus:outline-none focus:border-blue-600 focus:ring-2 focus:ring-blue-100 transition"
+                        />
+                        <input
+                          type="number"
+                          step="0.01"
+                          min="0"
+                          placeholder="Precio total €"
+                          value={newProjectFixedPrice}
+                          onChange={(e) => setNewProjectFixedPrice(e.target.value)}
+                          onKeyDown={(e) => e.key === 'Enter' && addProject()}
+                          className="px-4 py-3 bg-white border border-slate-300 rounded-lg focus:outline-none focus:border-blue-600 focus:ring-2 focus:ring-blue-100 transition tabular-nums"
+                        />
+                        <button
+                          onClick={addProject}
+                          disabled={savingProject}
+                          className="px-6 py-3 bg-blue-600 text-white rounded-lg font-bold hover:bg-blue-700 active:scale-[0.99] transition disabled:opacity-60 whitespace-nowrap"
+                        >
+                          {savingProject ? 'Creando…' : '+ Añadir'}
+                        </button>
+                      </div>
+                      <input
+                        type="number"
+                        step="0.5"
+                        min="0"
+                        placeholder="Horas estimadas (opcional) — Valopo calculará tu €/h real"
+                        value={newProjectEstimatedHours}
+                        onChange={(e) => setNewProjectEstimatedHours(e.target.value)}
+                        className="w-full px-4 py-2.5 bg-white border border-slate-300 rounded-lg focus:outline-none focus:border-blue-600 focus:ring-2 focus:ring-blue-100 transition text-sm tabular-nums"
+                      />
+                    </>
+                  )}
                   {clients.length > 0 ? (
                     <select
                       value={newProjectClientId}
@@ -1283,7 +1383,13 @@ export default function Dashboard() {
               {projects.map((project) => {
                 const projectSessions = sessions.filter((s) => s.project_id === project.id);
                 const hours = projectSessions.reduce((a, s) => a + sessionDuration(s), 0);
-                const earnings = hours * project.rate;
+                const isFixed = project.billing_type === 'fixed';
+                const earnings = isFixed
+                  ? (Number(project.fixed_price) || 0)
+                  : hours * project.rate;
+                const effectiveRate = isFixed && hours > 0
+                  ? (Number(project.fixed_price) || 0) / hours
+                  : Number(project.rate) || 0;
                 const isEditing = editingId === project.id;
 
                 return (
@@ -1380,8 +1486,23 @@ export default function Dashboard() {
                             </p>
                           )}
                           <p className="text-sm text-slate-500 mt-0.5 tabular-nums">
-                            €{project.rate}/h · {hours.toFixed(1)}h ·{' '}
-                            <span className="text-emerald-600 font-semibold">{formatEUR(earnings)}</span>
+                            {isFixed ? (
+                              <>
+                                <span className="inline-flex items-center gap-1 text-blue-700 bg-blue-50 px-1.5 py-0.5 rounded text-[10px] font-semibold mr-2 border border-blue-200">Precio cerrado</span>
+                                {formatEUR(Number(project.fixed_price) || 0)} · {hours.toFixed(1)}h
+                                {hours > 0 && (
+                                  <> · <span className="text-emerald-600 font-semibold">{effectiveRate.toFixed(2)} €/h real</span></>
+                                )}
+                                {project.estimated_hours && (
+                                  <span className="text-slate-400"> · est. {project.estimated_hours}h</span>
+                                )}
+                              </>
+                            ) : (
+                              <>
+                                €{project.rate}/h · {hours.toFixed(1)}h ·{' '}
+                                <span className="text-emerald-600 font-semibold">{formatEUR(earnings)}</span>
+                              </>
+                            )}
                           </p>
                         </div>
                         <div className="flex gap-2">
@@ -1601,7 +1722,9 @@ export default function Dashboard() {
                     <option value="">— Selecciona un proyecto —</option>
                     {projects.map((p) => (
                       <option key={p.id} value={p.id}>
-                        {p.name} · €{p.rate}/h
+                        {p.name} · {p.billing_type === 'fixed'
+                          ? `Precio cerrado ${Number(p.fixed_price || 0)}€`
+                          : `€${p.rate}/h`}
                       </option>
                     ))}
                   </select>
@@ -1665,20 +1788,40 @@ export default function Dashboard() {
                   />
                 </div>
 
-                {manualProjectId && (manualHours || manualMinutes) && (
-                  <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 text-sm">
-                    <p className="text-blue-900">
-                      Ganarás{' '}
-                      <strong className="tabular-nums">
-                        {formatEUR(
-                          ((parseFloat(manualHours) || 0) + (parseFloat(manualMinutes) || 0) / 60) *
-                            (projects.find((p) => p.id === manualProjectId)?.rate || 0)
-                        )}
-                      </strong>
-                      {' '}con esta sesión.
-                    </p>
-                  </div>
-                )}
+                {manualProjectId && (manualHours || manualMinutes) && (() => {
+                  const selectedProject = projects.find((p) => p.id === manualProjectId);
+                  const totalHours = (parseFloat(manualHours) || 0) + (parseFloat(manualMinutes) || 0) / 60;
+                  const isFixed = selectedProject?.billing_type === 'fixed';
+
+                  if (isFixed) {
+                    const price = Number(selectedProject?.fixed_price || 0);
+                    const sessionsForProject = sessions.filter(s => s.project_id === manualProjectId);
+                    const existingHours = sessionsForProject.reduce((a, s) => a + sessionDuration(s), 0);
+                    const newTotalHours = existingHours + totalHours;
+                    const effectiveRate = newTotalHours > 0 ? price / newTotalHours : 0;
+                    return (
+                      <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 text-sm">
+                        <p className="text-blue-900">
+                          Proyecto a precio cerrado. Con esta sesión llevarás{' '}
+                          <strong className="tabular-nums">{newTotalHours.toFixed(1)}h</strong> en total.
+                          Tu €/h real será <strong className="tabular-nums">{effectiveRate.toFixed(2)} €/h</strong>.
+                        </p>
+                      </div>
+                    );
+                  }
+
+                  return (
+                    <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 text-sm">
+                      <p className="text-blue-900">
+                        Ganarás{' '}
+                        <strong className="tabular-nums">
+                          {formatEUR(totalHours * (selectedProject?.rate || 0))}
+                        </strong>
+                        {' '}con esta sesión.
+                      </p>
+                    </div>
+                  );
+                })()}
               </div>
 
               <div className="flex gap-3 mt-6">
