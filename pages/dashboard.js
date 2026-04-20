@@ -55,6 +55,9 @@ export default function Dashboard() {
   const [editName, setEditName] = useState('');
   const [editRate, setEditRate] = useState('');
   const [editClientId, setEditClientId] = useState('');
+  const [editBillingType, setEditBillingType] = useState('hourly');
+  const [editFixedPrice, setEditFixedPrice] = useState('');
+  const [editEstimatedHours, setEditEstimatedHours] = useState('');
 
   // Confirm delete
   const [confirmDelete, setConfirmDelete] = useState(null);
@@ -580,8 +583,11 @@ export default function Dashboard() {
   const startEdit = (project) => {
     setEditingId(project.id);
     setEditName(project.name);
-    setEditRate(String(project.rate));
+    setEditRate(String(project.rate || ''));
     setEditClientId(project.client_id || '');
+    setEditBillingType(project.billing_type || 'hourly');
+    setEditFixedPrice(project.fixed_price ? String(project.fixed_price) : '');
+    setEditEstimatedHours(project.estimated_hours ? String(project.estimated_hours) : '');
   };
 
   const cancelEdit = () => {
@@ -589,29 +595,59 @@ export default function Dashboard() {
     setEditName('');
     setEditRate('');
     setEditClientId('');
+    setEditBillingType('hourly');
+    setEditFixedPrice('');
+    setEditEstimatedHours('');
   };
 
   const saveEdit = async () => {
     const name = editName.trim();
-    const rate = parseFloat(editRate);
-    if (!name || Number.isNaN(rate) || rate <= 0) {
-      showToast('error', 'Datos inválidos');
+    if (!name) {
+      showToast('error', 'Nombre vacío');
       return;
     }
+
+    let updates = {
+      name,
+      client_id: editClientId || null,
+      billing_type: editBillingType,
+    };
+
+    if (editBillingType === 'hourly') {
+      const rate = parseFloat(editRate);
+      if (Number.isNaN(rate) || rate <= 0) {
+        showToast('error', 'Introduce una tarifa válida');
+        return;
+      }
+      updates.rate = rate;
+      updates.fixed_price = null;
+      updates.estimated_hours = null;
+    } else if (editBillingType === 'fixed') {
+      const fixedPrice = parseFloat(editFixedPrice);
+      if (Number.isNaN(fixedPrice) || fixedPrice <= 0) {
+        showToast('error', 'Introduce un precio válido');
+        return;
+      }
+      updates.fixed_price = fixedPrice;
+      updates.rate = 0;
+      if (editEstimatedHours) {
+        const est = parseFloat(editEstimatedHours);
+        updates.estimated_hours = (!Number.isNaN(est) && est > 0) ? est : null;
+      } else {
+        updates.estimated_hours = null;
+      }
+    }
+
     try {
       const { error } = await supabase
         .from('projects')
-        .update({
-          name,
-          rate,
-          client_id: editClientId || null,
-        })
+        .update(updates)
         .eq('id', editingId);
       if (error) throw error;
       setProjects((prev) =>
         prev.map((p) =>
           p.id === editingId
-            ? { ...p, name, rate, client_id: editClientId || null }
+            ? { ...p, ...updates }
             : p
         )
       );
@@ -1396,35 +1432,109 @@ export default function Dashboard() {
                   <div key={project.id} className="p-5 sm:p-6 hover:bg-slate-50/50 transition">
                     {isEditing ? (
                       <div className="space-y-3">
-                        <div className="grid sm:grid-cols-[1fr_140px_auto] gap-3 items-center">
-                          <input
-                            type="text"
-                            value={editName}
-                            onChange={(e) => setEditName(e.target.value)}
-                            className="px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:border-blue-600"
-                          />
-                          <input
-                            type="number"
-                            step="0.01"
-                            value={editRate}
-                            onChange={(e) => setEditRate(e.target.value)}
-                            className="px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:border-blue-600 tabular-nums"
-                          />
-                          <div className="flex gap-2">
-                            <button
-                              onClick={saveEdit}
-                              className="px-4 py-2 bg-blue-600 text-white rounded-lg font-semibold hover:bg-blue-700 transition text-sm"
-                            >
-                              Guardar
-                            </button>
-                            <button
-                              onClick={cancelEdit}
-                              className="px-4 py-2 bg-slate-100 text-slate-700 rounded-lg font-semibold hover:bg-slate-200 transition text-sm"
-                            >
-                              Cancelar
-                            </button>
-                          </div>
+                        {/* Billing type tabs in edit */}
+                        <div className="flex gap-2">
+                          <button
+                            type="button"
+                            onClick={() => setEditBillingType('hourly')}
+                            className={`flex-1 px-3 py-2 text-xs font-semibold rounded-lg transition ${
+                              editBillingType === 'hourly'
+                                ? 'bg-blue-600 text-white'
+                                : 'bg-white text-slate-600 border border-slate-200 hover:border-blue-300'
+                            }`}
+                          >
+                            Por horas
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => setEditBillingType('fixed')}
+                            className={`flex-1 px-3 py-2 text-xs font-semibold rounded-lg transition ${
+                              editBillingType === 'fixed'
+                                ? 'bg-blue-600 text-white'
+                                : 'bg-white text-slate-600 border border-slate-200 hover:border-blue-300'
+                            }`}
+                          >
+                            Precio cerrado
+                          </button>
                         </div>
+
+                        {editBillingType === 'hourly' ? (
+                          <div className="grid sm:grid-cols-[1fr_140px_auto] gap-3 items-center">
+                            <input
+                              type="text"
+                              value={editName}
+                              onChange={(e) => setEditName(e.target.value)}
+                              placeholder="Nombre"
+                              className="px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:border-blue-600"
+                            />
+                            <input
+                              type="number"
+                              step="0.01"
+                              value={editRate}
+                              onChange={(e) => setEditRate(e.target.value)}
+                              placeholder="€/hora"
+                              className="px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:border-blue-600 tabular-nums"
+                            />
+                            <div className="flex gap-2">
+                              <button
+                                onClick={saveEdit}
+                                className="px-4 py-2 bg-blue-600 text-white rounded-lg font-semibold hover:bg-blue-700 transition text-sm"
+                              >
+                                Guardar
+                              </button>
+                              <button
+                                onClick={cancelEdit}
+                                className="px-4 py-2 bg-slate-100 text-slate-700 rounded-lg font-semibold hover:bg-slate-200 transition text-sm"
+                              >
+                                Cancelar
+                              </button>
+                            </div>
+                          </div>
+                        ) : (
+                          <>
+                            <div className="grid sm:grid-cols-[1fr_140px_auto] gap-3 items-center">
+                              <input
+                                type="text"
+                                value={editName}
+                                onChange={(e) => setEditName(e.target.value)}
+                                placeholder="Nombre"
+                                className="px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:border-blue-600"
+                              />
+                              <input
+                                type="number"
+                                step="0.01"
+                                value={editFixedPrice}
+                                onChange={(e) => setEditFixedPrice(e.target.value)}
+                                placeholder="Precio total €"
+                                className="px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:border-blue-600 tabular-nums"
+                              />
+                              <div className="flex gap-2">
+                                <button
+                                  onClick={saveEdit}
+                                  className="px-4 py-2 bg-blue-600 text-white rounded-lg font-semibold hover:bg-blue-700 transition text-sm"
+                                >
+                                  Guardar
+                                </button>
+                                <button
+                                  onClick={cancelEdit}
+                                  className="px-4 py-2 bg-slate-100 text-slate-700 rounded-lg font-semibold hover:bg-slate-200 transition text-sm"
+                                >
+                                  Cancelar
+                                </button>
+                              </div>
+                            </div>
+                            <input
+                              type="number"
+                              step="0.5"
+                              min="0"
+                              value={editEstimatedHours}
+                              onChange={(e) => setEditEstimatedHours(e.target.value)}
+                              placeholder="Horas estimadas (opcional)"
+                              className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:border-blue-600 text-sm tabular-nums"
+                            />
+                          </>
+                        )}
+
                         {clients.length > 0 && (
                           <select
                             value={editClientId}
@@ -1446,7 +1556,16 @@ export default function Dashboard() {
                           <div className="flex items-center gap-2 flex-wrap">
                             <h3 className="font-bold text-slate-900 truncate">{project.name}</h3>
                             {hourlyGoal && (() => {
-                              const r = Number(project.rate) || 0;
+                              const r = isFixed ? effectiveRate : (Number(project.rate) || 0);
+                              // For fixed-price projects with no hours yet, don't show badge
+                              if (isFixed && hours === 0) {
+                                return (
+                                  <span className="inline-flex items-center gap-1 text-[10px] font-bold text-slate-600 bg-slate-100 px-2 py-0.5 rounded-full border border-slate-200">
+                                    <span className="w-1.5 h-1.5 rounded-full bg-slate-400" />
+                                    Sin datos
+                                  </span>
+                                );
+                              }
                               const ratio = r / hourlyGoal;
                               if (ratio >= 1.10) {
                                 return (
