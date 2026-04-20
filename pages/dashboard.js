@@ -56,6 +56,15 @@ export default function Dashboard() {
   // Confirm delete
   const [confirmDelete, setConfirmDelete] = useState(null);
 
+  // Manual entry modal
+  const [manualModalOpen, setManualModalOpen] = useState(false);
+  const [manualProjectId, setManualProjectId] = useState('');
+  const [manualDate, setManualDate] = useState(new Date().toISOString().slice(0, 10));
+  const [manualHours, setManualHours] = useState('');
+  const [manualMinutes, setManualMinutes] = useState('');
+  const [manualNotes, setManualNotes] = useState('');
+  const [savingManual, setSavingManual] = useState(false);
+
   // Toast
   const [toast, setToast] = useState(null);
 
@@ -382,6 +391,66 @@ export default function Dashboard() {
     setNoteText('');
     setTimerSeconds(0);
     showToast('error', 'Sesión descartada');
+  };
+
+  const openManualModal = () => {
+    setManualProjectId(activeProject || (projects[0]?.id ?? ''));
+    setManualDate(new Date().toISOString().slice(0, 10));
+    setManualHours('');
+    setManualMinutes('');
+    setManualNotes('');
+    setManualModalOpen(true);
+  };
+
+  const saveManualSession = async () => {
+    const hours = parseFloat(manualHours) || 0;
+    const minutes = parseFloat(manualMinutes) || 0;
+
+    if (!manualProjectId) {
+      showToast('error', 'Selecciona un proyecto');
+      return;
+    }
+    if (hours === 0 && minutes === 0) {
+      showToast('error', 'Introduce una duración válida');
+      return;
+    }
+    if (!manualDate) {
+      showToast('error', 'Selecciona una fecha');
+      return;
+    }
+
+    setSavingManual(true);
+    try {
+      const durationSeconds = Math.round(hours * 3600 + minutes * 60);
+      const project = projects.find((p) => p.id === manualProjectId);
+      const earned = (durationSeconds / 3600) * (project?.rate || 0);
+
+      // Use the selected date with current time as end_time
+      const endDate = new Date(manualDate + 'T' + new Date().toTimeString().slice(0, 8));
+      const startDate = new Date(endDate.getTime() - durationSeconds * 1000);
+
+      const { error } = await supabase.from('sessions').insert([
+        {
+          user_id: user.id,
+          project_id: manualProjectId,
+          duration_seconds: durationSeconds,
+          earned: Number(earned.toFixed(2)),
+          start_time: startDate.toISOString(),
+          end_time: endDate.toISOString(),
+          notes: manualNotes.trim() || null,
+        },
+      ]);
+      if (error) throw error;
+
+      await loadData(user.id);
+      setManualModalOpen(false);
+      showToast('success', `Sesión registrada: ${formatTime(durationSeconds)}`);
+    } catch (error) {
+      console.error('Error saving manual session:', error);
+      showToast('error', 'No se pudo guardar la sesión');
+    } finally {
+      setSavingManual(false);
+    }
   };
 
   const openEditNote = (session) => {
@@ -1045,6 +1114,21 @@ export default function Dashboard() {
                         Crea tu primer proyecto abajo para empezar.
                       </p>
                     )}
+
+                    {!isRunning && projects.length > 0 && (
+                      <div className="mt-6 pt-6 border-t border-slate-100">
+                        <button
+                          onClick={openManualModal}
+                          className="w-full px-4 py-3 text-sm text-slate-600 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition font-semibold inline-flex items-center justify-center gap-2"
+                        >
+                          <Plus className="w-4 h-4" strokeWidth={2.5} />
+                          Añadir tiempo manualmente
+                        </button>
+                        <p className="text-xs text-slate-400 text-center mt-2">
+                          Para trabajo ya realizado, reuniones o sesiones sin cronómetro
+                        </p>
+                      </div>
+                    )}
                   </div>
                 </div>
               </div>
@@ -1471,6 +1555,145 @@ export default function Dashboard() {
                   className="flex-1 px-4 py-2.5 bg-red-600 text-white rounded-lg font-semibold hover:bg-red-700 transition"
                 >
                   Borrar
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Manual entry modal */}
+        {manualModalOpen && (
+          <div
+            className="fixed inset-0 z-50 bg-slate-900/50 backdrop-blur-sm flex items-center justify-center p-4"
+            onClick={() => setManualModalOpen(false)}
+          >
+            <div
+              className="bg-white rounded-2xl p-6 sm:p-8 max-w-md w-full shadow-2xl"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <div className="flex items-start justify-between mb-6">
+                <div>
+                  <h3 className="font-bold text-xl text-slate-900 mb-1">
+                    Añadir tiempo manualmente
+                  </h3>
+                  <p className="text-sm text-slate-500">
+                    Registra trabajo que no cronometraste en vivo
+                  </p>
+                </div>
+                <button
+                  onClick={() => setManualModalOpen(false)}
+                  className="text-slate-400 hover:text-slate-600 transition"
+                >
+                  <X className="w-5 h-5" strokeWidth={2.5} />
+                </button>
+              </div>
+
+              <div className="space-y-4">
+                <div>
+                  <label className="block text-xs font-semibold text-slate-600 uppercase tracking-wide mb-2">
+                    Proyecto
+                  </label>
+                  <select
+                    value={manualProjectId}
+                    onChange={(e) => setManualProjectId(e.target.value)}
+                    className="w-full px-4 py-3 bg-slate-50 border-2 border-slate-200 rounded-lg focus:outline-none focus:border-blue-600 focus:bg-white font-semibold text-slate-900 transition"
+                  >
+                    <option value="">— Selecciona un proyecto —</option>
+                    {projects.map((p) => (
+                      <option key={p.id} value={p.id}>
+                        {p.name} · €{p.rate}/h
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block text-xs font-semibold text-slate-600 uppercase tracking-wide mb-2">
+                    Fecha
+                  </label>
+                  <input
+                    type="date"
+                    value={manualDate}
+                    onChange={(e) => setManualDate(e.target.value)}
+                    max={new Date().toISOString().slice(0, 10)}
+                    className="w-full px-4 py-3 bg-slate-50 border-2 border-slate-200 rounded-lg focus:outline-none focus:border-blue-600 focus:bg-white font-semibold text-slate-900 transition"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-xs font-semibold text-slate-600 uppercase tracking-wide mb-2">
+                    Duración
+                  </label>
+                  <div className="grid grid-cols-2 gap-3">
+                    <div>
+                      <input
+                        type="number"
+                        min="0"
+                        max="24"
+                        value={manualHours}
+                        onChange={(e) => setManualHours(e.target.value)}
+                        placeholder="0"
+                        className="w-full px-4 py-3 bg-slate-50 border-2 border-slate-200 rounded-lg focus:outline-none focus:border-blue-600 focus:bg-white font-semibold text-slate-900 transition"
+                      />
+                      <p className="text-xs text-slate-400 text-center mt-1">horas</p>
+                    </div>
+                    <div>
+                      <input
+                        type="number"
+                        min="0"
+                        max="59"
+                        value={manualMinutes}
+                        onChange={(e) => setManualMinutes(e.target.value)}
+                        placeholder="0"
+                        className="w-full px-4 py-3 bg-slate-50 border-2 border-slate-200 rounded-lg focus:outline-none focus:border-blue-600 focus:bg-white font-semibold text-slate-900 transition"
+                      />
+                      <p className="text-xs text-slate-400 text-center mt-1">minutos</p>
+                    </div>
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-xs font-semibold text-slate-600 uppercase tracking-wide mb-2">
+                    Notas (opcional)
+                  </label>
+                  <textarea
+                    value={manualNotes}
+                    onChange={(e) => setManualNotes(e.target.value)}
+                    placeholder="¿En qué trabajaste?"
+                    rows={2}
+                    className="w-full px-4 py-3 bg-slate-50 border-2 border-slate-200 rounded-lg focus:outline-none focus:border-blue-600 focus:bg-white text-slate-900 transition resize-none"
+                  />
+                </div>
+
+                {manualProjectId && (manualHours || manualMinutes) && (
+                  <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 text-sm">
+                    <p className="text-blue-900">
+                      Ganarás{' '}
+                      <strong className="tabular-nums">
+                        {formatEUR(
+                          ((parseFloat(manualHours) || 0) + (parseFloat(manualMinutes) || 0) / 60) *
+                            (projects.find((p) => p.id === manualProjectId)?.rate || 0)
+                        )}
+                      </strong>
+                      {' '}con esta sesión.
+                    </p>
+                  </div>
+                )}
+              </div>
+
+              <div className="flex gap-3 mt-6">
+                <button
+                  onClick={() => setManualModalOpen(false)}
+                  className="flex-1 px-4 py-3 bg-slate-100 text-slate-700 rounded-lg font-semibold hover:bg-slate-200 transition"
+                >
+                  Cancelar
+                </button>
+                <button
+                  onClick={saveManualSession}
+                  disabled={savingManual || !manualProjectId || (!manualHours && !manualMinutes)}
+                  className="flex-1 px-4 py-3 bg-blue-600 text-white rounded-lg font-bold hover:bg-blue-700 transition disabled:opacity-60 disabled:cursor-not-allowed"
+                >
+                  {savingManual ? 'Guardando…' : 'Guardar sesión'}
                 </button>
               </div>
             </div>
