@@ -12,6 +12,7 @@ import {
   TrendingUp,
   Lightbulb,
   CheckCircle2,
+  Check,
   Play,
   Square,
   X,
@@ -659,6 +660,35 @@ export default function Dashboard() {
     }
   };
 
+  const toggleProjectComplete = async (project) => {
+    const isCompleting = !project.completed_at;
+    const newValue = isCompleting ? new Date().toISOString() : null;
+
+    try {
+      const { error } = await supabase
+        .from('projects')
+        .update({ completed_at: newValue })
+        .eq('id', project.id);
+      if (error) throw error;
+
+      setProjects((prev) =>
+        prev.map((p) =>
+          p.id === project.id ? { ...p, completed_at: newValue } : p
+        )
+      );
+
+      showToast(
+        'success',
+        isCompleting
+          ? `Proyecto completado · +${formatEUR(Number(project.fixed_price) || 0)} al mes`
+          : 'Proyecto reabierto'
+      );
+    } catch (error) {
+      console.error('Error toggling complete:', error);
+      showToast('error', 'No se pudo actualizar el proyecto');
+    }
+  };
+
   const deleteProject = async (id) => {
     try {
       await supabase.from('sessions').delete().eq('project_id', id);
@@ -706,16 +736,33 @@ export default function Dashboard() {
 
   const inRange = (s, from) => new Date(s.start_time || s.created_at) >= from;
 
+  // Fixed-price earnings: only count completed projects within the date range
+  const fixedEarnings = (from) => projects
+    .filter((p) => p.billing_type === 'fixed' && p.completed_at && new Date(p.completed_at) >= from)
+    .reduce((a, p) => a + Number(p.fixed_price || 0), 0);
+
+  const allFixedEarnings = () => projects
+    .filter((p) => p.billing_type === 'fixed' && p.completed_at)
+    .reduce((a, p) => a + Number(p.fixed_price || 0), 0);
+
   const todayHours = sessions.filter((s) => inRange(s, startOfToday)).reduce((a, s) => a + sessionDuration(s), 0);
-  const todayEarnings = sessions.filter((s) => inRange(s, startOfToday)).reduce((a, s) => a + sessionEarnings(s), 0);
+  const todayEarnings =
+    sessions.filter((s) => inRange(s, startOfToday)).reduce((a, s) => a + sessionEarnings(s), 0) +
+    fixedEarnings(startOfToday);
 
   const weekHours = sessions.filter((s) => inRange(s, startOfWeek)).reduce((a, s) => a + sessionDuration(s), 0);
-  const weekEarnings = sessions.filter((s) => inRange(s, startOfWeek)).reduce((a, s) => a + sessionEarnings(s), 0);
+  const weekEarnings =
+    sessions.filter((s) => inRange(s, startOfWeek)).reduce((a, s) => a + sessionEarnings(s), 0) +
+    fixedEarnings(startOfWeek);
 
   const monthHours = sessions.filter((s) => inRange(s, startOfMonth)).reduce((a, s) => a + sessionDuration(s), 0);
-  const monthEarnings = sessions.filter((s) => inRange(s, startOfMonth)).reduce((a, s) => a + sessionEarnings(s), 0);
+  const monthEarnings =
+    sessions.filter((s) => inRange(s, startOfMonth)).reduce((a, s) => a + sessionEarnings(s), 0) +
+    fixedEarnings(startOfMonth);
 
-  const totalEarnings = sessions.reduce((a, s) => a + sessionEarnings(s), 0);
+  const totalEarnings =
+    sessions.reduce((a, s) => a + sessionEarnings(s), 0) +
+    allFixedEarnings();
 
   const currentProject = projects.find((p) => p.id === activeProject);
   const currentEarnings = (timerSeconds / 3600) * (currentProject?.rate || 0);
@@ -1608,6 +1655,12 @@ export default function Dashboard() {
                             {isFixed ? (
                               <>
                                 <span className="inline-flex items-center gap-1 text-blue-700 bg-blue-50 px-1.5 py-0.5 rounded text-[10px] font-semibold mr-2 border border-blue-200">Precio cerrado</span>
+                                {project.completed_at && (
+                                  <span className="inline-flex items-center gap-1 text-emerald-700 bg-emerald-50 px-1.5 py-0.5 rounded text-[10px] font-semibold mr-2 border border-emerald-200">
+                                    <Check className="w-2.5 h-2.5" strokeWidth={3} />
+                                    Completado
+                                  </span>
+                                )}
                                 {formatEUR(Number(project.fixed_price) || 0)} · {hours.toFixed(1)}h
                                 {hours > 0 && (
                                   <> · <span className="text-emerald-600 font-semibold">{effectiveRate.toFixed(2)} €/h real</span></>
@@ -1624,7 +1677,19 @@ export default function Dashboard() {
                             )}
                           </p>
                         </div>
-                        <div className="flex gap-2">
+                        <div className="flex gap-2 flex-wrap">
+                          {isFixed && (
+                            <button
+                              onClick={() => toggleProjectComplete(project)}
+                              className={`px-4 py-2 rounded-lg transition text-sm font-semibold ${
+                                project.completed_at
+                                  ? 'bg-slate-100 text-slate-700 hover:bg-slate-200'
+                                  : 'bg-emerald-600 text-white hover:bg-emerald-700'
+                              }`}
+                            >
+                              {project.completed_at ? 'Reabrir' : 'Marcar completado'}
+                            </button>
+                          )}
                           <button
                             onClick={() => startEdit(project)}
                             className="px-4 py-2 bg-slate-100 text-slate-700 rounded-lg hover:bg-slate-200 transition text-sm font-semibold"
