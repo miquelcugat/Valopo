@@ -1111,6 +1111,17 @@ export default function Dashboard() {
                       días en {now.toLocaleDateString('es-ES', { month: 'long' })}
                     </span>
                   </div>
+                  {monthExpenses > 0 && (
+                    <div className="mt-3 pt-3 border-t border-slate-100 flex justify-between items-center text-xs">
+                      <span className="text-slate-500">
+                        Facturado bruto:{' '}
+                        <strong className="text-slate-700 tabular-nums">{formatEUR(monthGross)}</strong>
+                      </span>
+                      <span className="text-red-600">
+                        Gastos: <strong className="tabular-nums">-{formatEUR(monthExpenses)}</strong>
+                      </span>
+                    </div>
+                  )}
                 </div>
               )}
 
