@@ -16,21 +16,40 @@ export default function Auth() {
 
   // Detect already-logged-in users + OAuth callbacks
   useEffect(() => {
-    // On mount: check if there's already a valid session
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      if (session) {
-        router.replace('/dashboard');
+    let mounted = true;
+
+    const checkSession = async () => {
+      try {
+        const { data: { session }, error } = await supabase.auth.getSession();
+        console.log('[Auth] getSession result:', { hasSession: !!session, error });
+        if (mounted && session) {
+          console.log('[Auth] Session found, redirecting to /dashboard');
+          router.replace('/dashboard');
+        }
+      } catch (err) {
+        console.error('[Auth] Error checking session:', err);
       }
-    });
+    };
+
+    // Check session immediately
+    checkSession();
+
+    // Also check after a tiny delay (in case Supabase is still processing the URL hash)
+    const timeoutId = setTimeout(checkSession, 500);
 
     // Listen for auth state changes (e.g., after OAuth callback)
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
-      if (event === 'SIGNED_IN' && session) {
+      console.log('[Auth] State change:', event, 'hasSession:', !!session);
+      if (event === 'SIGNED_IN' && session && mounted) {
         router.replace('/dashboard');
       }
     });
 
-    return () => subscription.unsubscribe();
+    return () => {
+      mounted = false;
+      clearTimeout(timeoutId);
+      subscription.unsubscribe();
+    };
   }, [router]);
 
   const handleAuth = async (e) => {
