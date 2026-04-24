@@ -414,36 +414,189 @@ export default function Clients() {
         {/* Create / Edit modal */}
         {showModal && (
           <div
-            className="fixed inset-0 z-50 bg-slate-900/50 backdrop-blur-sm flex items-center justify-center p-4 overflow-y-auto"
+            className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm flex items-end sm:items-center justify-center sm:p-4"
             onClick={closeModal}
           >
             <div
-              className="bg-white rounded-2xl p-6 sm:p-8 max-w-2xl w-full shadow-2xl my-8"
+              className="bg-white w-full sm:max-w-2xl sm:rounded-2xl rounded-t-3xl shadow-2xl flex flex-col max-h-[92vh] sm:max-h-[90vh]"
               onClick={(e) => e.stopPropagation()}
             >
-              <h3 className="font-bold text-2xl text-slate-900 mb-1">
-                {editingId ? 'Editar cliente' : 'Nuevo cliente'}
-              </h3>
-              <p className="text-sm text-slate-500 mb-6">
-                Los campos marcados con * son obligatorios. El resto puedes
-                rellenarlos después.
-              </p>
-
-              <div className="space-y-4">
-                {/* Nombre */}
-                <div>
-                  <label className="block text-xs font-semibold text-slate-600 uppercase tracking-wide mb-1.5">
-                    Nombre o razón social *
-                  </label>
-                  <input
-                    type="text"
-                    value={form.name}
-                    onChange={(e) => handleChange('name', e.target.value)}
-                    placeholder="Acme S.L."
-                    autoFocus
-                    className="w-full px-4 py-2.5 bg-white border border-slate-300 rounded-lg focus:outline-none focus:border-blue-600 focus:ring-2 focus:ring-blue-100 transition"
-                  />
+              {/* Sticky header */}
+              <div className="flex items-start justify-between p-5 sm:p-6 border-b border-slate-100 flex-shrink-0">
+                <div className="min-w-0 flex-1">
+                  <h3 className="font-bold text-lg sm:text-xl text-slate-900">
+                    {editingId ? 'Editar cliente' : 'Nuevo cliente'}
+                  </h3>
+                  <p className="text-xs sm:text-sm text-slate-500 mt-0.5">
+                    Los campos con * son obligatorios
+                  </p>
                 </div>
+                <button
+                  onClick={closeModal}
+                  className="flex-shrink-0 w-9 h-9 ml-3 rounded-full bg-slate-100 hover:bg-slate-200 transition flex items-center justify-center text-slate-600"
+                  aria-label="Cerrar"
+                >
+                  <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </button>
+              </div>
+
+              {/* Scrollable body */}
+              <div className="flex-1 overflow-y-auto p-5 sm:p-6">
+                <div className="space-y-4">
+                  {/* Nombre */}
+                  <div>
+                    <label className="block text-xs font-bold text-slate-700 uppercase tracking-wide mb-2">
+                      Nombre o razón social *
+                    </label>
+                    <input
+                      type="text"
+                      value={form.name}
+                      onChange={(e) => handleChange('name', e.target.value)}
+                      placeholder="Acme S.L."
+                      autoFocus
+                      className="w-full px-4 py-3 bg-slate-50 border-2 border-slate-200 rounded-xl focus:outline-none focus:border-blue-600 focus:bg-white text-slate-900 transition text-base"
+                    />
+                  </div>
+
+                  {/* NIF + Email */}
+                  <div className="grid sm:grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-xs font-bold text-slate-700 uppercase tracking-wide mb-2">
+                        NIF / CIF
+                      </label>
+                      <input
+                        type="text"
+                        value={form.tax_id}
+                        onChange={(e) => handleChange('tax_id', e.target.value)}
+                        placeholder="B12345678"
+                        className="w-full px-4 py-3 bg-slate-50 border-2 border-slate-200 rounded-xl focus:outline-none focus:border-blue-600 focus:bg-white text-slate-900 transition text-base font-mono"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-bold text-slate-700 uppercase tracking-wide mb-2">
+                        Email
+                      </label>
+                      <input
+                        type="email"
+                        inputMode="email"
+                        value={form.email}
+                        onChange={(e) => handleChange('email', e.target.value)}
+                        placeholder="contacto@acme.com"
+                        className="w-full px-4 py-3 bg-slate-50 border-2 border-slate-200 rounded-xl focus:outline-none focus:border-blue-600 focus:bg-white text-slate-900 transition text-base"
+                      />
+                    </div>
+                  </div>
+
+                  {/* Teléfono */}
+                  <div>
+                    <label className="block text-xs font-bold text-slate-700 uppercase tracking-wide mb-2">
+                      Teléfono
+                    </label>
+                    <input
+                      type="tel"
+                      inputMode="tel"
+                      value={form.phone}
+                      onChange={(e) => handleChange('phone', e.target.value)}
+                      placeholder="+34 600 000 000"
+                      className="w-full px-4 py-3 bg-slate-50 border-2 border-slate-200 rounded-xl focus:outline-none focus:border-blue-600 focus:bg-white text-slate-900 transition text-base"
+                    />
+                  </div>
+
+                  {/* Dirección */}
+                  <div>
+                    <label className="block text-xs font-bold text-slate-700 uppercase tracking-wide mb-2">
+                      Dirección
+                    </label>
+                    <input
+                      type="text"
+                      value={form.address}
+                      onChange={(e) => handleChange('address', e.target.value)}
+                      placeholder="Calle Mayor 1, 2º A"
+                      className="w-full px-4 py-3 bg-slate-50 border-2 border-slate-200 rounded-xl focus:outline-none focus:border-blue-600 focus:bg-white text-slate-900 transition text-base"
+                    />
+                  </div>
+
+                  {/* Ciudad + CP */}
+                  <div className="grid sm:grid-cols-3 gap-4">
+                    <div className="sm:col-span-2">
+                      <label className="block text-xs font-bold text-slate-700 uppercase tracking-wide mb-2">
+                        Ciudad
+                      </label>
+                      <input
+                        type="text"
+                        value={form.city}
+                        onChange={(e) => handleChange('city', e.target.value)}
+                        placeholder="Madrid"
+                        className="w-full px-4 py-3 bg-slate-50 border-2 border-slate-200 rounded-xl focus:outline-none focus:border-blue-600 focus:bg-white text-slate-900 transition text-base"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-bold text-slate-700 uppercase tracking-wide mb-2">
+                        Código postal
+                      </label>
+                      <input
+                        type="text"
+                        inputMode="numeric"
+                        value={form.postal_code}
+                        onChange={(e) => handleChange('postal_code', e.target.value)}
+                        placeholder="28001"
+                        className="w-full px-4 py-3 bg-slate-50 border-2 border-slate-200 rounded-xl focus:outline-none focus:border-blue-600 focus:bg-white text-slate-900 transition text-base tabular-nums"
+                      />
+                    </div>
+                  </div>
+
+                  {/* País */}
+                  <div>
+                    <label className="block text-xs font-bold text-slate-700 uppercase tracking-wide mb-2">
+                      País
+                    </label>
+                    <input
+                      type="text"
+                      value={form.country}
+                      onChange={(e) => handleChange('country', e.target.value)}
+                      placeholder="España"
+                      className="w-full px-4 py-3 bg-slate-50 border-2 border-slate-200 rounded-xl focus:outline-none focus:border-blue-600 focus:bg-white text-slate-900 transition text-base"
+                    />
+                  </div>
+
+                  {/* Notas */}
+                  <div>
+                    <label className="block text-xs font-bold text-slate-700 uppercase tracking-wide mb-2">
+                      Notas internas <span className="text-slate-400 font-medium normal-case">(opcional)</span>
+                    </label>
+                    <textarea
+                      value={form.notes}
+                      onChange={(e) => handleChange('notes', e.target.value)}
+                      placeholder="Cualquier nota privada que quieras recordar…"
+                      rows={3}
+                      className="w-full px-4 py-3 bg-slate-50 border-2 border-slate-200 rounded-xl focus:outline-none focus:border-blue-600 focus:bg-white text-slate-900 transition text-base resize-none"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {/* Sticky footer */}
+              <div className="p-5 sm:p-6 border-t border-slate-100 flex-shrink-0 flex gap-3">
+                <button
+                  onClick={closeModal}
+                  className="flex-1 px-4 py-3.5 bg-slate-100 text-slate-700 rounded-xl font-bold hover:bg-slate-200 transition text-base"
+                >
+                  Cancelar
+                </button>
+                <button
+                  onClick={saveClient}
+                  disabled={saving}
+                  className="flex-[2] px-4 py-3.5 bg-blue-600 text-white rounded-xl font-bold hover:bg-blue-700 active:scale-[0.99] transition disabled:opacity-60 disabled:cursor-not-allowed text-base shadow-sm"
+                >
+                  {saving ? 'Guardando…' : editingId ? 'Guardar cambios' : 'Crear cliente'}
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+      </div>
 
                 {/* NIF + Email */}
                 <div className="grid sm:grid-cols-2 gap-4">
