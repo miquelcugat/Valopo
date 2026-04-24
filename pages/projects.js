@@ -927,7 +927,7 @@ export default function Projects() {
                       </div>
                     </div>
                   </div>
-                ) : (
+                ) : !hourlyGoal ? (
                   <div className="bg-white border border-dashed border-slate-300 rounded-2xl p-5 mb-6 flex items-center justify-between gap-4 flex-wrap">
                     <div className="flex items-start gap-3">
                       <Target className="w-6 h-6 text-blue-600 flex-shrink-0 mt-0.5" strokeWidth={2.25} />
@@ -947,7 +947,7 @@ export default function Projects() {
                       Configurar objetivo →
                     </Link>
                   </div>
-                )
+                ) : null
               )}
 
               {analysisTitle && (
