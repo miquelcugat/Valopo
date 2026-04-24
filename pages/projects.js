@@ -726,21 +726,23 @@ export default function Projects() {
       <div className="min-h-screen bg-slate-50">
         <AppHeader />
 
-        <main className="max-w-6xl mx-auto px-6 py-8 sm:py-10 pb-24 md:pb-10">
-          <div className="mb-8 flex items-start justify-between gap-4 flex-wrap">
-            <div>
-              <h1 className="text-3xl font-bold text-slate-900">Mis proyectos</h1>
-              <p className="text-slate-500 mt-1">
-                Análisis detallado, estadísticas y gestión de cada proyecto.
-              </p>
+        <main className="max-w-6xl mx-auto px-4 sm:px-6 py-6 sm:py-10 pb-24 md:pb-10">
+          <div className="mb-6 sm:mb-8">
+            <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
+              <div className="min-w-0 flex-1">
+                <h1 className="text-2xl sm:text-3xl font-bold text-slate-900">Mis proyectos</h1>
+                <p className="text-sm sm:text-base text-slate-500 mt-1">
+                  Análisis, estadísticas y gestión de proyectos
+                </p>
+              </div>
+              <button
+                onClick={() => setCreateModalOpen(true)}
+                className="w-full sm:w-auto flex-shrink-0 px-5 py-3 bg-blue-600 text-white rounded-lg font-bold hover:bg-blue-700 active:scale-[0.99] transition inline-flex items-center justify-center gap-2 shadow-sm"
+              >
+                <span className="text-lg leading-none">+</span>
+                Nuevo proyecto
+              </button>
             </div>
-            <button
-              onClick={() => setCreateModalOpen(true)}
-              className="px-5 py-3 bg-blue-600 text-white rounded-lg font-bold hover:bg-blue-700 active:scale-[0.99] transition inline-flex items-center gap-2 shadow-sm"
-            >
-              <span className="text-lg leading-none">+</span>
-              Nuevo proyecto
-            </button>
           </div>
 
           {projects.length === 0 ? (
@@ -1312,40 +1314,45 @@ export default function Projects() {
         {/* Create project modal */}
         {createModalOpen && (
           <div
-            className="fixed inset-0 z-50 bg-slate-900/50 backdrop-blur-sm flex items-center justify-center p-4"
+            className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm flex items-end sm:items-center justify-center sm:p-4"
             onClick={() => setCreateModalOpen(false)}
           >
             <div
-              className="bg-white rounded-2xl p-6 sm:p-8 max-w-lg w-full shadow-2xl max-h-[90vh] overflow-y-auto"
+              className="bg-white w-full sm:max-w-lg sm:rounded-2xl rounded-t-3xl shadow-2xl flex flex-col max-h-[92vh] sm:max-h-[90vh]"
               onClick={(e) => e.stopPropagation()}
             >
-              <div className="flex items-start justify-between mb-6">
-                <div>
-                  <h3 className="font-bold text-xl text-slate-900 mb-1">Nuevo proyecto</h3>
-                  <p className="text-sm text-slate-500">Crea un proyecto y empieza a registrar tiempo</p>
+              {/* Modal header - sticky */}
+              <div className="flex items-center justify-between p-5 sm:p-6 border-b border-slate-100 flex-shrink-0">
+                <div className="min-w-0 flex-1">
+                  <h3 className="font-bold text-lg sm:text-xl text-slate-900">Nuevo proyecto</h3>
+                  <p className="text-xs sm:text-sm text-slate-500 mt-0.5">Empieza a registrar tiempo y ganancias</p>
                 </div>
                 <button
                   onClick={() => setCreateModalOpen(false)}
-                  className="text-slate-400 hover:text-slate-600 transition text-2xl leading-none"
+                  className="flex-shrink-0 w-9 h-9 ml-3 rounded-full bg-slate-100 hover:bg-slate-200 transition flex items-center justify-center text-slate-600"
+                  aria-label="Cerrar"
                 >
-                  ×
+                  <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+                  </svg>
                 </button>
               </div>
 
-              <div className="space-y-4">
+              {/* Modal body - scrollable */}
+              <div className="flex-1 overflow-y-auto p-5 sm:p-6 space-y-5">
                 {/* Billing type tabs */}
                 <div>
-                  <label className="block text-xs font-semibold text-slate-600 uppercase tracking-wide mb-2">
+                  <label className="block text-xs font-bold text-slate-700 uppercase tracking-wide mb-2.5">
                     Tipo de facturación
                   </label>
-                  <div className="flex gap-2">
+                  <div className="grid grid-cols-2 gap-2">
                     <button
                       type="button"
                       onClick={() => setNewProjectBillingType('hourly')}
-                      className={`flex-1 px-3 py-3 text-sm font-semibold rounded-lg transition ${
+                      className={`px-3 py-3.5 text-sm font-bold rounded-xl transition border-2 ${
                         newProjectBillingType === 'hourly'
-                          ? 'bg-blue-600 text-white'
-                          : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+                          ? 'bg-blue-600 text-white border-blue-600'
+                          : 'bg-white text-slate-600 border-slate-200 hover:border-slate-300'
                       }`}
                     >
                       Por horas
@@ -1353,10 +1360,10 @@ export default function Projects() {
                     <button
                       type="button"
                       onClick={() => setNewProjectBillingType('fixed')}
-                      className={`flex-1 px-3 py-3 text-sm font-semibold rounded-lg transition ${
+                      className={`px-3 py-3.5 text-sm font-bold rounded-xl transition border-2 ${
                         newProjectBillingType === 'fixed'
-                          ? 'bg-blue-600 text-white'
-                          : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+                          ? 'bg-blue-600 text-white border-blue-600'
+                          : 'bg-white text-slate-600 border-slate-200 hover:border-slate-300'
                       }`}
                     >
                       Precio cerrado
@@ -1366,65 +1373,78 @@ export default function Projects() {
 
                 {/* Project name */}
                 <div>
-                  <label className="block text-xs font-semibold text-slate-600 uppercase tracking-wide mb-2">
+                  <label className="block text-xs font-bold text-slate-700 uppercase tracking-wide mb-2">
                     Nombre del proyecto
                   </label>
                   <input
                     type="text"
                     value={newProjectName}
                     onChange={(e) => setNewProjectName(e.target.value)}
-                    placeholder="Ej: Rediseño Web · Cliente A"
-                    className="w-full px-4 py-3 bg-slate-50 border-2 border-slate-200 rounded-lg focus:outline-none focus:border-blue-600 focus:bg-white text-slate-900 transition"
+                    placeholder="Ej: Web · Cliente A"
+                    className="w-full px-4 py-3.5 bg-slate-50 border-2 border-slate-200 rounded-xl focus:outline-none focus:border-blue-600 focus:bg-white text-slate-900 transition text-base"
+                    autoFocus
                   />
                 </div>
 
                 {/* Rate or Fixed price */}
                 {newProjectBillingType === 'hourly' ? (
                   <div>
-                    <label className="block text-xs font-semibold text-slate-600 uppercase tracking-wide mb-2">
-                      Tarifa por hora (€)
+                    <label className="block text-xs font-bold text-slate-700 uppercase tracking-wide mb-2">
+                      Tarifa por hora
                     </label>
-                    <input
-                      type="number"
-                      step="0.01"
-                      min="0"
-                      value={newProjectRate}
-                      onChange={(e) => setNewProjectRate(e.target.value)}
-                      placeholder="50"
-                      className="w-full px-4 py-3 bg-slate-50 border-2 border-slate-200 rounded-lg focus:outline-none focus:border-blue-600 focus:bg-white text-slate-900 transition tabular-nums"
-                    />
-                  </div>
-                ) : (
-                  <>
-                    <div>
-                      <label className="block text-xs font-semibold text-slate-600 uppercase tracking-wide mb-2">
-                        Precio total (€)
-                      </label>
+                    <div className="relative">
                       <input
                         type="number"
                         step="0.01"
                         min="0"
-                        value={newProjectFixedPrice}
-                        onChange={(e) => setNewProjectFixedPrice(e.target.value)}
-                        placeholder="1500"
-                        className="w-full px-4 py-3 bg-slate-50 border-2 border-slate-200 rounded-lg focus:outline-none focus:border-blue-600 focus:bg-white text-slate-900 transition tabular-nums"
+                        inputMode="decimal"
+                        value={newProjectRate}
+                        onChange={(e) => setNewProjectRate(e.target.value)}
+                        placeholder="50"
+                        className="w-full px-4 py-3.5 pr-12 bg-slate-50 border-2 border-slate-200 rounded-xl focus:outline-none focus:border-blue-600 focus:bg-white text-slate-900 transition text-base tabular-nums"
                       />
+                      <span className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 font-semibold text-base pointer-events-none">€/h</span>
+                    </div>
+                  </div>
+                ) : (
+                  <>
+                    <div>
+                      <label className="block text-xs font-bold text-slate-700 uppercase tracking-wide mb-2">
+                        Precio total del proyecto
+                      </label>
+                      <div className="relative">
+                        <input
+                          type="number"
+                          step="0.01"
+                          min="0"
+                          inputMode="decimal"
+                          value={newProjectFixedPrice}
+                          onChange={(e) => setNewProjectFixedPrice(e.target.value)}
+                          placeholder="1500"
+                          className="w-full px-4 py-3.5 pr-10 bg-slate-50 border-2 border-slate-200 rounded-xl focus:outline-none focus:border-blue-600 focus:bg-white text-slate-900 transition text-base tabular-nums"
+                        />
+                        <span className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 font-semibold text-base pointer-events-none">€</span>
+                      </div>
                     </div>
                     <div>
-                      <label className="block text-xs font-semibold text-slate-600 uppercase tracking-wide mb-2">
-                        Horas estimadas (opcional)
+                      <label className="block text-xs font-bold text-slate-700 uppercase tracking-wide mb-2">
+                        Horas estimadas <span className="text-slate-400 font-medium normal-case">(opcional)</span>
                       </label>
-                      <input
-                        type="number"
-                        step="0.5"
-                        min="0"
-                        value={newProjectEstimatedHours}
-                        onChange={(e) => setNewProjectEstimatedHours(e.target.value)}
-                        placeholder="30"
-                        className="w-full px-4 py-3 bg-slate-50 border-2 border-slate-200 rounded-lg focus:outline-none focus:border-blue-600 focus:bg-white text-slate-900 transition tabular-nums"
-                      />
-                      <p className="text-xs text-slate-500 mt-1">
-                        Si las conoces, Valopo calculará tu €/hora real
+                      <div className="relative">
+                        <input
+                          type="number"
+                          step="0.5"
+                          min="0"
+                          inputMode="decimal"
+                          value={newProjectEstimatedHours}
+                          onChange={(e) => setNewProjectEstimatedHours(e.target.value)}
+                          placeholder="30"
+                          className="w-full px-4 py-3.5 pr-10 bg-slate-50 border-2 border-slate-200 rounded-xl focus:outline-none focus:border-blue-600 focus:bg-white text-slate-900 transition text-base tabular-nums"
+                        />
+                        <span className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 font-semibold text-base pointer-events-none">h</span>
+                      </div>
+                      <p className="text-xs text-slate-500 mt-1.5 leading-relaxed">
+                        Valopo calculará tu €/hora real comparándolo con el tiempo que inviertas
                       </p>
                     </div>
                   </>
@@ -1433,13 +1453,18 @@ export default function Projects() {
                 {/* Client */}
                 {clients.length > 0 && (
                   <div>
-                    <label className="block text-xs font-semibold text-slate-600 uppercase tracking-wide mb-2">
-                      Cliente (opcional)
+                    <label className="block text-xs font-bold text-slate-700 uppercase tracking-wide mb-2">
+                      Cliente <span className="text-slate-400 font-medium normal-case">(opcional)</span>
                     </label>
                     <select
                       value={newProjectClientId}
                       onChange={(e) => setNewProjectClientId(e.target.value)}
-                      className="w-full px-4 py-3 bg-slate-50 border-2 border-slate-200 rounded-lg focus:outline-none focus:border-blue-600 focus:bg-white text-slate-900 transition"
+                      className="w-full px-4 py-3.5 bg-slate-50 border-2 border-slate-200 rounded-xl focus:outline-none focus:border-blue-600 focus:bg-white text-slate-900 transition text-base appearance-none bg-no-repeat pr-10"
+                      style={{
+                        backgroundImage: `url("data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%2394a3b8' stroke-width='2.5'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' d='M19 9l-7 7-7-7'/%3E%3C/svg%3E")`,
+                        backgroundPosition: 'right 1rem center',
+                        backgroundSize: '1.1rem'
+                      }}
                     >
                       <option value="">— Sin cliente asignado —</option>
                       {clients.map((c) => (
@@ -1450,17 +1475,18 @@ export default function Projects() {
                 )}
               </div>
 
-              <div className="flex gap-3 mt-6">
+              {/* Modal footer - sticky */}
+              <div className="p-5 sm:p-6 border-t border-slate-100 flex-shrink-0 flex gap-3">
                 <button
                   onClick={() => setCreateModalOpen(false)}
-                  className="flex-1 px-4 py-3 bg-slate-100 text-slate-700 rounded-lg font-semibold hover:bg-slate-200 transition"
+                  className="flex-1 px-4 py-3.5 bg-slate-100 text-slate-700 rounded-xl font-bold hover:bg-slate-200 transition text-base"
                 >
                   Cancelar
                 </button>
                 <button
                   onClick={addProject}
                   disabled={savingProject}
-                  className="flex-1 px-4 py-3 bg-blue-600 text-white rounded-lg font-bold hover:bg-blue-700 transition disabled:opacity-60"
+                  className="flex-[2] px-4 py-3.5 bg-blue-600 text-white rounded-xl font-bold hover:bg-blue-700 active:scale-[0.99] transition disabled:opacity-60 disabled:cursor-not-allowed text-base shadow-sm"
                 >
                   {savingProject ? 'Creando…' : 'Crear proyecto'}
                 </button>
