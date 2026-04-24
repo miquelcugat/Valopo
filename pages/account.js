@@ -3,6 +3,7 @@ import { useRouter } from 'next/router';
 import Head from 'next/head';
 import Link from 'next/link';
 import ValopoLogo from '../components/ValopoLogo';
+import AppHeader from '../components/AppHeader';
 import { supabase } from '../lib/supabaseClient';
 import { usePlan } from '../lib/usePlan';
 import MobileNav from '../components/MobileNav';
@@ -330,29 +331,7 @@ export default function Account() {
       </Head>
 
       <div className="min-h-screen bg-slate-50">
-        <header className="bg-white border-b border-slate-200">
-          <nav className="max-w-4xl mx-auto px-6 py-4 flex justify-between items-center">
-            <div className="flex items-center gap-3">
-              <ValopoLogo size={40} />
-              <span className="font-bold text-xl bg-gradient-to-r from-blue-700 to-blue-500 bg-clip-text text-transparent">Valopo</span>
-            </div>
-            <Link
-              href="/dashboard"
-              className="hidden md:inline-flex text-sm text-slate-600 hover:bg-slate-100 px-4 py-2 rounded-lg font-medium"
-            >
-              ← Volver al dashboard
-            </Link>
-            <button
-              onClick={async () => {
-                await supabase.auth.signOut();
-                router.push('/');
-              }}
-              className="md:hidden px-3 py-2 text-sm text-slate-600 hover:bg-slate-100 rounded-lg transition font-medium"
-            >
-              Salir
-            </button>
-          </nav>
-        </header>
+        <AppHeader />
 
         <main className="max-w-4xl mx-auto px-6 py-10 pb-24 md:pb-10">
           <h1 className="text-3xl font-bold text-slate-900 mb-8">Mi cuenta</h1>
