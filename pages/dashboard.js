@@ -627,7 +627,7 @@ export default function Dashboard() {
       }
     }
 
-    if (!isPro && projects.length >= limits.maxProjects) {
+    if (!isPro && limits && projects.length >= limits.maxProjects) {
       triggerUpgrade(
         `Has alcanzado el límite de ${limits.maxProjects} proyectos del plan Free.`
       );
@@ -958,9 +958,6 @@ export default function Dashboard() {
       hourlyDot = 'bg-red-500';
     }
   }
-
-  const atProjectLimit = !isPro && projects.length >= limits.maxProjects;
-  const projectsRemaining = isPro ? Infinity : Math.max(0, limits.maxProjects - projects.length);
 
   // ---------- Loading ----------
   if (loading || planLoading) {
