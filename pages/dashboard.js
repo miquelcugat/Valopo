@@ -829,13 +829,14 @@ export default function Dashboard() {
 
   const inRange = (s, from) => new Date(s.start_time || s.created_at) >= from;
 
-  // Fixed-price earnings: only count completed projects within the date range
+  // Fixed-price earnings: count projects within the date range by creation date
+  // (so a fixed-price project "locks in" revenue the month it's created)
   const fixedEarnings = (from) => projects
-    .filter((p) => p.billing_type === 'fixed' && p.completed_at && new Date(p.completed_at) >= from)
+    .filter((p) => p.billing_type === 'fixed' && p.created_at && new Date(p.created_at) >= from)
     .reduce((a, p) => a + Number(p.fixed_price || 0), 0);
 
   const allFixedEarnings = () => projects
-    .filter((p) => p.billing_type === 'fixed' && p.completed_at)
+    .filter((p) => p.billing_type === 'fixed')
     .reduce((a, p) => a + Number(p.fixed_price || 0), 0);
 
   // Expenses within date range (by expense_date)
